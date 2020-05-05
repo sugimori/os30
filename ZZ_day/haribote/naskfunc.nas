@@ -10,7 +10,7 @@
 
 ;[FILE "naskfunc.nas"]			; ソースファイル名情報
 
-		GLOBAL	io_hlt			; このプログラムに含まれる関数名
+		GLOBAL	io_hlt,write_mem8			; このプログラムに含まれる関数名
 
 
 ; 以下は実際の関数
