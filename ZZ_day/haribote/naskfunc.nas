@@ -19,3 +19,9 @@
 io_hlt:	; void io_hlt(void);
 		HLT
 		RET
+
+write_mem8:		;void write_mem8(int addr, int data)
+		MOV		ECX,[ESP+4]		; カウンタレジスタ
+		MOV		AL,[ESP+8]		; アキュムレータレジスタ
+		MOV		[ECX],AL
+		RET
