@@ -2,8 +2,7 @@
 fdimage0.bin
 */*/haribote.sys
 */*/haribote.img
-*/*/bootpack.o
 */*/bootpack.hrb
-*/*/naskfunc.lst
-*/*/naskfunc.o
+*/*/*.lst
+*/*/*.o
 */*/haribote.sys
