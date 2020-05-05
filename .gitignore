@@ -1,2 +1,8 @@
 .DS_Store
 fdimage0.bin
+ZZ_day/haribote/haribote.sys
+ZZ_day/haribote/haribote.img
+ZZ_day/haribote/bootpack.o
+ZZ_day/haribote/bootpack.hrb
+ZZ_day/haribote/naskfunc.lst
+ZZ_day/haribote/naskfunc.o
