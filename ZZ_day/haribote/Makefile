@@ -27,6 +27,9 @@ ipl10.bin : ipl10.nas Makefile
 asmhead.bin : asmhead.nas Makefile
 	$(NASK) asmhead.nas -o asmhead.bin -l asmhead.lst
 
+naskfunc.o : naskfunc.nas Makefile
+	$(NASK) -g -f elf naskfunc.nas -o naskfunc.o -l naskfunc.lst
+
 # bootpack.gas : bootpack.c Makefile
 # 	$(CC1) -o bootpack.gas bootpack.c
 
@@ -47,8 +50,8 @@ asmhead.bin : asmhead.nas Makefile
 bootpack.o : bootpack.c
 	$(CC) -march=i486 -m32 -nostdlib -c bootpack.c -o bootpack.o
 
-bootpack.hrb : bootpack.o har.ld Makefile
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
+bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o -o bootpack.hrb
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
 
 
