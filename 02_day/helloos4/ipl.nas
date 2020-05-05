@@ -51,10 +51,10 @@ fin:
 
 msg:
 		DB		0x0a, 0x0a		; ‰üs‚ğ2‚Â
-		DB		"hello, world"
+		DB		"hello, world2"
 		DB		0x0a			; ‰üs
 		DB		0
 
-		RESB	0x7dfe-$		; 0x7dfe‚Ü‚Å‚ğ0x00‚Å–„‚ß‚é–½—ß
+		RESB	0x7dfe-0x7c00-($-$$)		; 0x7dfe‚Ü‚Å‚ğ0x00‚Å–„‚ß‚é–½—ß
 
 		DB		0x55, 0xaa
