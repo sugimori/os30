@@ -10,7 +10,7 @@ void io_store_eflags(int eflags);
 void init_palette(void);
 void set_palette(int start, int end, unsigned char *rgb);
 void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
-void init_screen(char *vram, int xsize, int ysize);
+void init_screen(unsigned char *vram, int xsize, int ysize);
 
 
 /* カラーパレットの定義 */
@@ -31,23 +31,26 @@ void init_screen(char *vram, int xsize, int ysize);
 #define COL8_008484		14
 #define COL8_848484		15
 
+struct BOOTINFO {
+	char cyls,leds,vmode,reserve;
+	short scrnx,scrny;
+	char *vram;
+};
+
 void HariMain(void)
 {
 	int i;
 	char *vram;
 	int xsize,ysize;
-	short *binfo_scrnx, *binfo_scrny;
-	int *binfo_vram;
+	struct BOOTINFO *binfo;
 
 	init_palette();
 
-	binfo_scrnx = (short *)0x0ff4;
-	binfo_scrny = (short *)0x0ff6;
-	binfo_vram = (int *)0x0ff8;
+	binfo = (struct BOOTINFO *)0x0ff0;
 
-	vram = (char *)*binfo_vram;
-	xsize = *binfo_scrnx;
-	ysize = *binfo_scrny;
+	vram = (*binfo).vram;
+	xsize = (*binfo).scrnx;
+	ysize = (*binfo).scrny;
 
 	init_screen(vram,xsize,ysize);
 
@@ -57,7 +60,7 @@ void HariMain(void)
 
 }
 
-void init_screen(char *vram, int xsize, int ysize)
+void init_screen(unsigned char *vram, int xsize, int ysize)
 {
 	boxfill8(vram, xsize, COL8_008484,  0,         0,          xsize -  1, ysize - 29);
 	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
