@@ -47,13 +47,18 @@ naskfunc.o : naskfunc.nas Makefile
 # bootpack.hrb : bootpack.bim Makefile
 # 	$(BIM2HRB) bootpack.bim bootpack.hrb 0
 
+hankaku.c : hankaku.txt
+	makefont.rb > hankaku.c
+
+hankaku.o : hankaku.c
+	$(CC) -march=i486 -m32 -nostdlib -c hankaku.c -o hankaku.o
+
 bootpack.o : bootpack.c
 	$(CC) -march=i486 -m32 -nostdlib -c bootpack.c -o bootpack.o
 
-bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o -o bootpack.hrb
+bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o -o bootpack.hrb
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
-
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile
 	cat asmhead.bin bootpack.hrb > haribote.sys
@@ -87,6 +92,7 @@ clean :
 	-$(DEL) bootpack.bim
 	-$(DEL) bootpack.hrb
 	-$(DEL) haribote.sys
+	-$(DEL) hankaku.c
 
 src_only :
 	$(MAKE) clean
