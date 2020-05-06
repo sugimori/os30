@@ -13,6 +13,7 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 void init_screen(unsigned char *vram, int xsize, int ysize);
 void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font);
 
+extern char hankaku[4096];
 
 /* カラーパレットの定義 */
 #define COL8_000000		0
@@ -53,7 +54,13 @@ void HariMain(void)
 
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
 
-	putfont8(binfo->vram,binfo->scrnx, 10,20,COL8_FFFFFF,font_A);
+	putfont8(binfo->vram,binfo->scrnx, 10,20,COL8_FFFFFF,hankaku + 'B' * 16);
+	putfont8(binfo->vram, binfo->scrnx,  8, 8, COL8_FFFFFF, hankaku + 'A' * 16);
+	putfont8(binfo->vram, binfo->scrnx, 16, 8, COL8_FFFFFF, hankaku + 'B' * 16);
+	putfont8(binfo->vram, binfo->scrnx, 24, 8, COL8_FFFFFF, hankaku + 'C' * 16);
+	putfont8(binfo->vram, binfo->scrnx, 40, 8, COL8_FFFFFF, hankaku + '1' * 16);
+	putfont8(binfo->vram, binfo->scrnx, 48, 8, COL8_FFFFFF, hankaku + '2' * 16);
+	putfont8(binfo->vram, binfo->scrnx, 56, 8, COL8_FFFFFF, hankaku + '3' * 16);
 
 	for(;;) {
 		io_hlt();
