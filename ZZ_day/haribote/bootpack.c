@@ -11,6 +11,7 @@ void init_palette(void);
 void set_palette(int start, int end, unsigned char *rgb);
 void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
 void init_screen(unsigned char *vram, int xsize, int ysize);
+void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font);
 
 
 /* カラーパレットの定義 */
@@ -31,6 +32,7 @@ void init_screen(unsigned char *vram, int xsize, int ysize);
 #define COL8_008484		14
 #define COL8_848484		15
 
+/* BOOTのINFO */
 struct BOOTINFO {
 	char cyls,leds,vmode,reserve;
 	short scrnx,scrny;
@@ -40,6 +42,10 @@ struct BOOTINFO {
 void HariMain(void)
 {
 	struct BOOTINFO *binfo;
+	static char font_A[16] = {
+		0x00, 0x18, 0x18, 0x18, 0x18, 0x24, 0x24, 0x24,
+		0x24, 0x7e, 0x42, 0x42, 0x42, 0xe7, 0x00, 0x00
+	};
 
 	init_palette();
 
@@ -47,10 +53,31 @@ void HariMain(void)
 
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
 
+	putfont8(binfo->vram,binfo->scrnx, 10,20,COL8_FFFFFF,font_A);
+
 	for(;;) {
 		io_hlt();
 	}
 
+}
+
+void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font)
+{
+	char *p,d;
+	int i;
+	for(i=0;i<16;i++) {
+		d = font[i];
+		p = vram + x + (y + i) * xsize;
+		if((d & 0x80) != 0) { p[0] = color;}
+		if((d & 0x40) != 0) { p[1] = color;}
+		if((d & 0x20) != 0) { p[2] = color;}
+		if((d & 0x10) != 0) { p[3] = color;}
+		if((d & 0x08) != 0) { p[4] = color;}
+		if((d & 0x04) != 0) { p[5] = color;}
+		if((d & 0x02) != 0) { p[6] = color;}
+		if((d & 0x01) != 0) { p[7] = color;}
+	}
+	return;
 }
 
 void init_screen(unsigned char *vram, int xsize, int ysize)
