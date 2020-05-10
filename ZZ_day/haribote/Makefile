@@ -21,46 +21,20 @@ default :
 
 # ƒtƒ@ƒCƒ‹¶¬‹K‘¥
 
-ipl10.bin : ipl10.nas Makefile
-	$(NASK) ipl10.nas -o ipl10.bin -l ipl10.lst
-
-asmhead.bin : asmhead.nas Makefile
-	$(NASK) asmhead.nas -o asmhead.bin -l asmhead.lst
+%.bin : %.nas Makefile
+	$(NASK) $*.nas -o $*.bin -l $*.lst
 
 naskfunc.o : naskfunc.nas Makefile
 	$(NASK) -g -f elf naskfunc.nas -o naskfunc.o -l naskfunc.lst
 
-# bootpack.gas : bootpack.c Makefile
-# 	$(CC1) -o bootpack.gas bootpack.c
-
-# bootpack.nas : bootpack.gas Makefile
-# 	$(GAS2NASK) bootpack.gas bootpack.nas
-
-# bootpack.obj : bootpack.nas Makefile
-# 	$(NASK) bootpack.nas bootpack.obj bootpack.lst
-
-# bootpack.bim : bootpack.obj Makefile
-# 	$(OBJ2BIM) @$(RULEFILE) out:bootpack.bim stack:3136k map:bootpack.map \
-# 		bootpack.obj
-# 3MB+64KB=3136KB
-
-# bootpack.hrb : bootpack.bim Makefile
-# 	$(BIM2HRB) bootpack.bim bootpack.hrb 0
-
 hankaku.c : hankaku.txt
 	makefont.rb > hankaku.c
 
-hankaku.o : hankaku.c
-	$(CC) -march=i486 -m32 -nostdlib -c hankaku.c -o hankaku.o
-
-sprintf.o : sprintf.c
-	$(CC) -march=i486 -m32 -nostdlib -c sprintf.c -o sprintf.o
-
-bootpack.o : bootpack.c
-	$(CC) -march=i486 -m32 -nostdlib -c bootpack.c -o bootpack.o
-
-bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o -o bootpack.hrb
+%.o : %.c Makefile
+	$(CC) -march=i486 -m32 -nostdlib -c $*.c -o $*.o
+	
+bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o graphic.o dsctbl.o
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o -o bootpack.hrb
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile
