@@ -14,6 +14,8 @@ void init_screen(unsigned char *vram, int xsize, int ysize);
 void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font);
 void putfonts8_asc(char *vram, int xsize, int x, int y, char color, unsigned char *s);
 int sprintf (char *str, char *fmt, ...);
+void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
+void init_mouse_cursor8(char *mouse, char bc) ;
 
 /* カラーパレットの定義 */
 #define COL8_000000		0
@@ -43,7 +45,8 @@ struct BOOTINFO {
 void HariMain(void)
 {
 	struct BOOTINFO *binfo;
-	char s[20];
+	char s[20], mcursor[256];
+	int mx, my;
 
 	init_palette();
 	binfo = (struct BOOTINFO *)0x0ff0;
@@ -56,6 +59,15 @@ void HariMain(void)
 
 	sprintf(s, "scrnx = %d", binfo->scrnx);
 	putfonts8_asc(binfo->vram, binfo->scrnx, 16,64, COL8_FFFFFF, s);
+
+	/* マウスを書く */
+	mx = (binfo->scrnx - 16) / 2; /* 画面中央になるように座標計算 */
+	my = (binfo->scrny - 28 - 16) / 2;
+	init_mouse_cursor8(mcursor, COL8_008484);
+	putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
+
+	sprintf(s, "(%d, %d)", mx, my);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 100, COL8_FFFFFF, s);
 
 	for(;;) {
 		io_hlt();
@@ -163,5 +175,54 @@ void set_palette(int start, int end, unsigned char *rgb)
 		rgb += 3;
 	}
 	io_store_eflags(eflags);	/* 割り込み許可フラグを元に戻す */
+	return;
+}
+
+void init_mouse_cursor8(char *mouse, char bc) 
+{
+	static char cursor[16][16] = {
+		"**************..",
+		"*OOOOOOOOOOO*...",
+		"*OOOOOOOOOO*....",
+		"*OOOOOOOOO*.....",
+		"*OOOOOOOO*......",
+		"*OOOOOOO*.......",
+		"*OOOOOOO*.......",
+		"*OOOOOOOO*......",
+		"*OOOO**OOO*.....",
+		"*OOO*..*OOO*....",
+		"*OO*....*OOO*...",
+		"*O*......*OOO*..",
+		"**........*OOO*.",
+		"*..........*OOO*",
+		"............*OO*",
+		".............***"
+	};
+	int x, y;
+
+	for(y=0;y<16;y++) {
+		for(x=0;x<16;x++) {
+			if(cursor[y][x] == '*') {
+				mouse[y * 16 + x] = COL8_000000;
+			}
+			if(cursor[y][x] == 'O') {
+				mouse[y * 16 + x] = COL8_FFFFFF;
+			}
+			if(cursor[y][x] == '.') {
+				mouse[y * 16 + x] = bc;
+			}
+		}
+	}
+	return;
+}
+
+void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize)
+{
+	int x, y;
+	for(y=0;y<pysize;y++) {
+		for(x=0;x<pxsize;x++) {
+			vram[(py0 + y) * vxsize + (px0 + x)] = buf[y*bxsize + x];
+		}
+	}
 	return;
 }
