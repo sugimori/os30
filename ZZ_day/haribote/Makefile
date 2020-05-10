@@ -53,11 +53,14 @@ hankaku.c : hankaku.txt
 hankaku.o : hankaku.c
 	$(CC) -march=i486 -m32 -nostdlib -c hankaku.c -o hankaku.o
 
+sprintf.o : sprintf.c
+	$(CC) -march=i486 -m32 -nostdlib -c sprintf.c -o sprintf.o
+
 bootpack.o : bootpack.c
 	$(CC) -march=i486 -m32 -nostdlib -c bootpack.c -o bootpack.o
 
-bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o -o bootpack.hrb
+bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o -o bootpack.hrb
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile
