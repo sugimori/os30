@@ -7,7 +7,7 @@ void HariMain(void)
 	int mx, my;
 
 	init_palette();
-	binfo = (struct BOOTINFO *)0x0ff0;
+	binfo = (struct BOOTINFO *)ADR_BOOTINFO;
 
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
 
