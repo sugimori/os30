@@ -30,11 +30,11 @@ naskfunc.o : naskfunc.nas Makefile
 hankaku.c : hankaku.txt
 	makefont.rb > hankaku.c
 
-%.o : %.c Makefile
+%.o : %.c Makefile bootpack.h
 	$(CC) -march=i486 -m32 -nostdlib -c $*.c -o $*.o
 	
-bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o graphic.o dsctbl.o
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o -o bootpack.hrb
+bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o graphic.o dsctbl.o int.o
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o -o bootpack.hrb
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile

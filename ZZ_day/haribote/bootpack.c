@@ -6,6 +6,9 @@ void HariMain(void)
 	char s[20], mcursor[256];
 	int mx, my;
 
+	init_gdtidt();
+	init_pic();
+
 	init_palette();
 	binfo = (struct BOOTINFO *)ADR_BOOTINFO;
 
