@@ -1,5 +1,7 @@
 #include "bootpack.h"
 
+extern struct KEYBUF keybuf;
+
 void HariMain(void)
 {
 	struct BOOTINFO *binfo;
@@ -37,7 +39,17 @@ void HariMain(void)
 
 
 	for(;;) {
-		io_hlt();
+		io_cli(); // 割り込み禁止
+		if(keybuf.flag == 0) {
+			io_stihlt(); // 割り込み開始
+		} else {
+			int i = keybuf.data;
+			keybuf.flag = 0;
+			io_sti(); // 割り込み開始
+			sprintf(s, "%x", i);
+			boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 0, 16, 15, 31);
+			putfonts8_asc(binfo->vram, binfo->scrnx, 0, 16, COL8_FFFFFF, s);
+		}
 	}
 	return;
 }
