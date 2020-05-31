@@ -1,11 +1,11 @@
 #include "bootpack.h"
 
-extern struct KEYBUF keybuf;
+extern struct FIFO8 keyfifo;
 
 void HariMain(void)
 {
 	struct BOOTINFO *binfo;
-	char s[20], mcursor[256];
+	char s[40], mcursor[256], keybuf[32];
 	int mx, my;
 
 	init_gdtidt();
@@ -37,18 +37,15 @@ void HariMain(void)
 	io_out8(PIC0_IMR, 0xf9); /* PIC1とキーボードを許可(11111001) */
 	io_out8(PIC1_IMR, 0xef); /* マウスを許可(11101111) */
 
+	fifo8_init(&keyfifo, 32, keybuf);
 
 	for(;;) {
 		io_cli(); // 割り込み禁止
-		if(keybuf.len == 0) {
+
+		if(fifo8_status(&keyfifo) == 0) {
 			io_stihlt(); // 割り込み開始
 		} else {
-			int i = keybuf.data[keybuf.next_r];
-			keybuf.len--;
-			keybuf.next_r++;
-			if(keybuf.next_r == 32) {
-				keybuf.next_r = 0;
-			}
+			int i = fifo8_get(&keyfifo);
 			io_sti(); // 割り込み開始
 			sprintf(s, "%x", i);
 			boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 0, 16, 15, 31);
