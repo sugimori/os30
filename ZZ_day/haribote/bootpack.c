@@ -40,11 +40,15 @@ void HariMain(void)
 
 	for(;;) {
 		io_cli(); // 割り込み禁止
-		if(keybuf.flag == 0) {
+		if(keybuf.len == 0) {
 			io_stihlt(); // 割り込み開始
 		} else {
-			int i = keybuf.data;
-			keybuf.flag = 0;
+			int i = keybuf.data[keybuf.next_r];
+			keybuf.len--;
+			keybuf.next_r++;
+			if(keybuf.next_r == 32) {
+				keybuf.next_r = 0;
+			}
 			io_sti(); // 割り込み開始
 			sprintf(s, "%x", i);
 			boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 0, 16, 15, 31);
