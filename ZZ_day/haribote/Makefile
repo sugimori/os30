@@ -33,8 +33,8 @@ hankaku.c : hankaku.txt
 %.o : %.c Makefile bootpack.h
 	$(CC) -march=i486 -m32 -nostdlib -c $*.c -o $*.o
 	
-bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o -o bootpack.hrb
+bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o -o bootpack.hrb
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile

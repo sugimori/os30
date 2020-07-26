@@ -2,9 +2,6 @@
 
 #define PORT_KEYDAT     0x0060
 
-struct FIFO8 keyfifo;
-struct FIFO8 mousefifo;
-
 void init_pic(void)
 {
     io_out8(PIC0_IMR, 0xff);    // 割り込み禁止
@@ -26,30 +23,8 @@ void init_pic(void)
     return;
 }
 
-void inthandler21(int *esp) 
-{
-    // http://oswiki.osask.jp/?%28PIC%298259A
-    unsigned char data;
-    io_out8(PIC0_OCW2, 0x61);
-    // http://oswiki.osask.jp/?%28AT%29keyboard
-    data = io_in8(PORT_KEYDAT);
 
-    fifo8_put(&keyfifo, data);
 
-    return;
-}
-
-void inthandler2c(int *esp)
-/* PS/2マウスからの割り込み */
-{
-    unsigned char data;
-    io_out8(PIC1_OCW2, 0x64); // IRQ-12受付完了 スレーブ
-    io_out8(PIC0_OCW2, 0x62); // IRQ-02受付完了 マスター
-
-    data = io_in8(PORT_KEYDAT);
-    fifo8_put(&mousefifo, data);
-    return;
-}
 
 void inthandler27(int *esp)
 /* PIC0からの不完全割り込み対策 */
