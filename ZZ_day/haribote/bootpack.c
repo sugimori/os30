@@ -1,6 +1,9 @@
 #include "bootpack.h"
 
 extern struct FIFO8 keyfifo,mousefifo;
+unsigned int memtest(unsigned int start, unsigned int end);
+unsigned int memtest_sub(unsigned int start, unsigned int end);
+
 
 void HariMain(void)
 {
@@ -29,6 +32,11 @@ void HariMain(void)
 	putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
 	sprintf(s, "(%d, %d)", mx, my);
 	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+
+	/* メモリチェック */
+	i = memtest(0x00400000, 0xbfffffff) / (1024 * 1024);
+	sprintf(s,"memory %dMB", i);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
 
 	enable_mouse(&mdec);
 
@@ -78,4 +86,64 @@ void HariMain(void)
 		}
 	}
 	return;
+}
+
+#define EFLAGS_AC_BIT		0x00040000
+#define CR0_CACHE_DISABLE	0x60000000
+
+unsigned int memtest(unsigned int start, unsigned int end)
+{
+	char flg486 = 0;
+	unsigned int eflg, cr0, i;
+
+	// 386か、486か
+	eflg = io_load_eflags();
+	eflg |= EFLAGS_AC_BIT; // AC-bit = 1
+	io_store_eflags(eflg);
+	eflg = io_load_eflags();
+	if((eflg & EFLAGS_AC_BIT) != 0) {
+		flg486 = 1;
+	}
+	eflg &= ~EFLAGS_AC_BIT; // AC-bit = 0
+	io_store_eflags(eflg); // AC 0で書き込み
+
+	if(flg486 != 0) {
+		cr0 = load_cr0();
+		cr0 |= CR0_CACHE_DISABLE; // キャッシュ禁止
+		store_cr0(cr0);
+	}
+
+	i = memtest_sub(start, end);
+
+	if(flg486 != 0) {
+		cr0 = load_cr0();
+		cr0 &= ~CR0_CACHE_DISABLE; // キャッシュ許可
+		store_cr0(cr0);
+	}
+
+	return i;
+
+}
+
+unsigned int memtest_sub(unsigned int start, unsigned int end)
+{
+	unsigned int i, *p, old, pat0 = 0xaa55aa55, pat1 = 0x55aa55aa;
+	for( i = start; i<= end; i += 4) {
+		p = (unsigned int *) i;
+		old = *p; 
+		*p = pat0;
+		*p ^= 0xffffffff;
+		if( *p != pat1) {
+not_memory:
+			*p = old;
+			break;
+		}
+
+		*p ^= 0xffffffff;
+		if(*p != pat0) {
+			goto not_memory;
+		}
+		*p = old;
+	}
+	return i;
 }
