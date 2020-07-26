@@ -67,6 +67,19 @@ void HariMain(void)
 					}
 					boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 32, 16, 32 + 15*8 -1 , 31);
 					putfonts8_asc(binfo->vram, binfo->scrnx, 32, 16, COL8_FFFFFF, s);
+
+					// マウスカーソルの移動
+					boxfill8(binfo->vram, binfo->scrnx, COL8_008484, mx, my, mx+15, my+15); // マウス消す
+					mx += mdec.x;
+					my += mdec.y;
+					if(mx < 0) mx = 0;
+					if(my < 0) my = 0;
+					if(mx > binfo->scrnx - 16) mx = binfo->scrnx -16;
+					if(my > binfo->scrny - 16) my = binfo->scrny - 16;
+					sprintf(s, "(%d, %d)", mx, my);
+					boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 0, 0, 8*12 -1, 15); // 座標消す
+					putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s); // 座標書く
+					putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16); // マウス書く
 				}
 
 			}
@@ -142,10 +155,10 @@ int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat)
 		mdec->x = mdec->buf[1];
 		mdec->y = mdec->buf[2];
 
-		if((mdec->buf[0] & 0x10) != 0) {
+		if((mdec->buf[0] & 0x10) != 0) { // x方向にマイナス
 			mdec->x |= 0xffffff00;
 		}
-		if((mdec->buf[0] & 0x20) != 0) {
+		if((mdec->buf[0] & 0x20) != 0) { // y方向にマイナス
 			mdec->y |= 0xffffff00;
 		}
 		mdec->y = - mdec->y; // 符号が逆
