@@ -1,15 +1,29 @@
 #include <stdarg.h>
  
 //10進数からASCIIコードに変換
-int dec2asc (char *str, int dec) {
+int dec2asc (char *str, int dec, int zero) {
     int len = 0, len_buf; //桁数
+    int minus = 0;
     int buf[10];
+    if( dec < 0) {
+        minus = 1;
+        dec *= -1;
+    }
     while (1) { //10で割れた回数（つまり桁数）をlenに、各桁をbufに格納
         buf[len++] = dec % 10;
         if (dec < 10) break;
         dec /= 10;
     }
-    len_buf = len;
+    if(len + minus > zero) {
+        len_buf = len + minus;
+    } else {
+        len_buf = zero;
+        while(zero > len + minus) {
+            *(str++) = ' ';
+            zero--;
+        }
+    }
+    if(minus != 0) *(str++) = '-';
     while (len) {
         *(str++) = buf[--len] + 0x30;
     }
@@ -43,7 +57,7 @@ int sprintf (char *str, char *fmt, ...) {
             fmt++;
             switch(*fmt){
                 case 'd':
-                    len = dec2asc(str, va_arg (list, int));
+                    len = dec2asc(str, va_arg (list, int), 4);
                     break;
                 case 'x':
                     len = hex2asc(str, va_arg (list, int));
