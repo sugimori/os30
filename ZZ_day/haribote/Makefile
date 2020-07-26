@@ -13,6 +13,7 @@ EDIMG    = $(TOOLPATH)edimg
 IMGTOL   = $(TOOLPATH)imgtol
 COPY     = cp
 DEL      = rm -f
+OBJS_BOOTPACK = bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o
 
 # デフォルト動作
 
@@ -33,8 +34,8 @@ hankaku.c : hankaku.txt
 %.o : %.c Makefile bootpack.h
 	$(CC) -march=i486 -m32 -nostdlib -c $*.c -o $*.o
 	
-bootpack.hrb : bootpack.o naskfunc.o har.ld Makefile hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o -o bootpack.hrb
+bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld 
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld $(OBJS_BOOTPACK) -o bootpack.hrb
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile
