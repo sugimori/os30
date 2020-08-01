@@ -16,6 +16,8 @@ void HariMain(void)
 	struct SHTCTL *shtctl;
 	struct SHEET *sht_back, *sht_mouse, *sht_win;
 	unsigned char *buf_back, buf_mouse[256], *buf_win;
+	// counter
+	unsigned int count = 0;
 
 	
 
@@ -41,15 +43,13 @@ void HariMain(void)
 	sht_mouse = sheet_alloc(shtctl);
 	sht_win = sheet_alloc(shtctl);
 	buf_back = (unsigned char *)memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
-	buf_win  = (unsigned char *)memman_alloc_4k(memman, 160 * 68);
+	buf_win  = (unsigned char *)memman_alloc_4k(memman, 160 * 52);
 	sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1); // 透明色なし
 	sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99); // 透明番号99？
-	sheet_setbuf(sht_win, buf_win, 160, 68, -1); // 透明色なし
+	sheet_setbuf(sht_win, buf_win, 160, 52, -1); // 透明色なし
 	init_screen8(buf_back,binfo->scrnx,binfo->scrny); // 背景初期化
 	init_mouse_cursor8(buf_mouse, 99);  // マウス初期化
-	make_window8(buf_win,160,68,"windows");
-	putfonts8_asc(buf_win, 160, 24, 28, COL8_000000, "Welcome to");
-	putfonts8_asc(buf_win, 160, 24, 44, COL8_000000, "  Haribote-OS!");
+	make_window8(buf_win,160,52,"counter");
 	sheet_slide(sht_back, 0,0); // 背景の位置を設定
 	mx = (binfo->scrnx - 16) / 2; /* 画面中央になるように座標計算 */
 	my = (binfo->scrny - 28 - 16) / 2;
@@ -58,7 +58,7 @@ void HariMain(void)
 	sheet_updown(sht_back, 0);	// 背景は０固定？
 	sheet_updown(sht_win, 1);
 	sheet_updown(sht_mouse, 2);
-
+	
 	sprintf(s, "(%d, %d)", mx, my);
 	putfonts8_asc(buf_back, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	sprintf(s,"memory %dMB    free : %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
@@ -66,9 +66,15 @@ void HariMain(void)
 	sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 
 	for(;;) {
+		count++;
+		sprintf(s, "%d", count);
+		boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
+		putfonts8_asc(buf_win, 160, 40, 28, COL8_000000, s);
+		sheet_refresh(sht_win, 40,28,120,44);
+
 		io_cli(); // 割り込み禁止
 		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo)== 0) {
-			io_stihlt(); // 割り込み開始
+			io_sti(); // 割り込み開始
 		} else {
 			if(fifo8_status(&keyfifo) != 0) {
 				i = fifo8_get(&keyfifo);
