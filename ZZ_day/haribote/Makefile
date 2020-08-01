@@ -13,7 +13,7 @@ EDIMG    = $(TOOLPATH)edimg
 IMGTOL   = $(TOOLPATH)imgtol
 COPY     = cp
 DEL      = rm -f
-OBJS_BOOTPACK = bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o memory.o
+OBJS_BOOTPACK = bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o memory.o sheet.o
 
 # デフォルト動作
 
