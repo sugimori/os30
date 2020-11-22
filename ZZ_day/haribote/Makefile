@@ -3,8 +3,9 @@ INCPATH  = ../../z_tools/haribote/
 
 MAKE     = make -r
 NASK     = nasm
-CC      = /usr/local/Cellar/x86_64-elf-gcc/9.3.0/bin/x86_64-elf-gcc
-LD 		= /usr/local/Cellar/x86_64-elf-binutils/2.34/bin/x86_64-elf-ld
+#CC      = /usr/local/Cellar/x86_64-elf-gcc/9.3.0/bin/x86_64-elf-gcc
+CC      = /usr/local/Cellar/x86_64-elf-gcc/10.2.0/bin/x86_64-elf-gcc
+LD 		= /usr/local/Cellar/x86_64-elf-binutils/2.35/bin/x86_64-elf-ld
 GAS2NASK = $(TOOLPATH)gas2nask -a
 OBJ2BIM  = $(TOOLPATH)obj2bim
 BIM2HRB  = $(TOOLPATH)bim2hrb
@@ -29,7 +30,7 @@ naskfunc.o : naskfunc.nas Makefile
 	$(NASK) -g -f elf naskfunc.nas -o naskfunc.o -l naskfunc.lst
 
 hankaku.c : hankaku.txt
-	makefont.rb > hankaku.c
+	./makefont.rb > hankaku.c
 
 %.o : %.c Makefile bootpack.h
 	$(CC) -march=i486 -m32 -nostdlib -c $*.c -o $*.o
