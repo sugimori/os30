@@ -16,9 +16,9 @@
 		GLOBAL	io_out8,io_out16,io_out32
 		GLOBAL	io_load_eflags,io_store_eflags
 		GLOBAL	load_gdtr, load_idtr
-		GLOBAL	asm_inthandler21, asm_inthandler27, asm_inthandler2c
+		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c
 		GLOBAL	load_cr0, store_cr0
-		EXTERN	inthandler21, inthandler2c, inthandler27
+		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27
 
 
 ; à»â∫ÇÕé¿ç€ÇÃä÷êî
@@ -99,6 +99,21 @@ load_idtr:		; void load_idtr(int limit, int addr);
 		LIDT	[ESP+6]
 		RET
 
+asm_inthandler20:	;	void asm_inthandler20(void);
+		PUSH	ES
+		PUSH	DS
+		PUSHAD
+		MOV		EAX,ESP
+		PUSH	EAX
+		MOV		AX,SS
+		MOV		DS,AX
+		MOV		ES,AX
+		CALL	inthandler20
+		POP		EAX
+		POPAD
+		POP		DS
+		POP		ES
+		IRETD
 asm_inthandler21:	;	void asm_inthandler21(void);
 		PUSH	ES
 		PUSH	DS
