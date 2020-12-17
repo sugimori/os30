@@ -6,7 +6,7 @@ extern struct TIMERCTL timerctl;
 void HariMain(void)
 {
 	struct BOOTINFO *binfo = (struct BOOTINFO *)ADR_BOOTINFO;
-	char s[40], mcursor[256], keybuf[32], mousebuf[128];
+	char s[40], mcursor[256], keybuf[32], mousebuf[128], timerbuf[8];
 	int mx, my, i;
 	unsigned char mouse_dbuf[3], mouse_phase;
 	struct MOUSE_DEC mdec;
@@ -17,6 +17,8 @@ void HariMain(void)
 	struct SHTCTL *shtctl;
 	struct SHEET *sht_back, *sht_mouse, *sht_win;
 	unsigned char *buf_back, buf_mouse[256], *buf_win;
+	// timer
+	struct FIFO8 timerfifo;
 	
 
 	init_gdtidt();
@@ -27,6 +29,10 @@ void HariMain(void)
 	init_pit();
 	io_out8(PIC0_IMR, 0xf8); /* PITとPIC1とキーボードを許可(11111000) */
 	io_out8(PIC1_IMR, 0xef); /* マウスを許可(11101111) */
+
+	fifo8_init(&timerfifo, 8, timerbuf);
+	settimer(1000,&timerfifo,1);
+	
 
 	init_keyboard();
 	enable_mouse(&mdec);
@@ -64,14 +70,15 @@ void HariMain(void)
 	putfonts8_asc(buf_back, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
 	sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 
+	
 	for(;;) {
-		sprintf(s, "%d", timerctl.count);
+		sprintf(s, "%d", timerctl.timeout);
 		boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
 		putfonts8_asc(buf_win, 160, 40, 28, COL8_000000, s);
 		sheet_refresh(sht_win, 40,28,120,44);
 
 		io_cli(); // 割り込み禁止
-		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo)== 0) {
+		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo) + fifo8_status(&timerfifo) == 0) {
 			io_sti(); // 割り込み開始
 		} else {
 			if(fifo8_status(&keyfifo) != 0) {
@@ -113,6 +120,11 @@ void HariMain(void)
 					sheet_slide(sht_mouse,mx,my);
 				}
 
+			} else if (fifo8_status(&timerfifo) != 0) {
+				i = fifo8_get(&timerfifo);
+				io_sti();
+				putfonts8_asc(buf_back, binfo->scrnx, 0, 64, COL8_FFFFFF, "10[sec]");
+				sheet_refresh(sht_back, 0, 64,56,80);
 			}
 		}
 	}

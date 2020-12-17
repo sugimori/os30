@@ -189,9 +189,13 @@ void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, in
 /* timer.c */
 void init_pit(void);
 void inthandler20(int *esp);
+void settimer(unsigned int timeout, struct FIFO8 *fifo, unsigned char data);
 struct TIMERCTL
 {
 	unsigned int count;
+	unsigned int timeout;
+	struct FIFO8 *fifo;
+	unsigned char data;
 };
 
 
