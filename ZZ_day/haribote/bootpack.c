@@ -20,7 +20,7 @@ void HariMain(void)
 	struct SHEET *sht_back, *sht_mouse, *sht_win;
 	unsigned char *buf_back, buf_mouse[256], *buf_win;
 	// timer
-	struct FIFO8 timerfifo,timerfifo2,timerfifo3;
+	struct FIFO8 timerfifo;
 	struct TIMER *timer, *timer2, *timer3;
 	
 
@@ -35,15 +35,13 @@ void HariMain(void)
 
 	fifo8_init(&timerfifo, 8, timerbuf);
 	timer = timer_alloc();
-	timer_init(timer, &timerfifo, 1);
+	timer_init(timer, &timerfifo, 10);
 	timer_settime(timer, 1000);
-	fifo8_init(&timerfifo2, 8, timerbuf2);
 	timer2 = timer_alloc();
-	timer_init(timer2, &timerfifo2, 1);
+	timer_init(timer2, &timerfifo, 3);
 	timer_settime(timer2, 300);
-	fifo8_init(&timerfifo3, 8, timerbuf3);
 	timer3 = timer_alloc();
-	timer_init(timer3, &timerfifo3, 1);
+	timer_init(timer3, &timerfifo, 1);
 	timer_settime(timer3, 50);
 
 	
@@ -90,8 +88,7 @@ void HariMain(void)
 		putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
 
 		io_cli(); // 割り込み禁止
-		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo) 
-			+ fifo8_status(&timerfifo) + fifo8_status(&timerfifo2) + fifo8_status(&timerfifo3) == 0) {
+		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo) + fifo8_status(&timerfifo) == 0) {
 			io_sti(); // 割り込み開始
 		} else {
 			if(fifo8_status(&keyfifo) != 0) {
@@ -130,23 +127,21 @@ void HariMain(void)
 			} else if (fifo8_status(&timerfifo) != 0) {
 				i = fifo8_get(&timerfifo);
 				io_sti();
-				putfonts8_asc_sht(sht_back,0,64,COL8_FFFFFF,COL8_008484,"10[sec]",7);
-			} else if (fifo8_status(&timerfifo2) != 0) {
-				i = fifo8_get(&timerfifo2);
-				io_sti();
-				putfonts8_asc_sht(sht_back,0,80,COL8_FFFFFF,COL8_008484,"3[sec]",6);
-			} else if (fifo8_status(&timerfifo3) != 0) {
-				i = fifo8_get(&timerfifo3);
-				io_sti();
-				if(i!=0) {
-					timer_init(timer3, &timerfifo3, 0); 
-					boxfill8(buf_back, binfo->scrnx,COL8_FFFFFF, 8, 96,15,111);
+				if(i==10) {
+					putfonts8_asc_sht(sht_back,0,64,COL8_FFFFFF,COL8_008484,"10[sec]",7);
+				} else if(i==3) {
+					putfonts8_asc_sht(sht_back,0,80,COL8_FFFFFF,COL8_008484,"3[sec]",6);
 				} else {
-					timer_init(timer3, &timerfifo3, 1); 
-					boxfill8(buf_back, binfo->scrnx, COL8_008484, 8, 96, 15, 111);
+					if(i!=0) {
+						timer_init(timer3, &timerfifo, 0); 
+						boxfill8(buf_back, binfo->scrnx,COL8_FFFFFF, 8, 96,15,111);
+					} else {
+						timer_init(timer3, &timerfifo, 1); 
+						boxfill8(buf_back, binfo->scrnx, COL8_008484, 8, 96, 15, 111);
+					}
+					timer_settime(timer3, 50);
+					sheet_refresh(sht_back, 8, 96,16,112);
 				}
-				timer_settime(timer3, 50);
-				sheet_refresh(sht_back, 8, 96,16,112);
 			}
 		}
 	}
