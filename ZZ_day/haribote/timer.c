@@ -14,5 +14,6 @@ void init_pit(void)
 void inthandler20(int *esp)
 {
     io_out8(PIC0_OCW2, 0x60);
+    timerctl.count++;
     return;
 }

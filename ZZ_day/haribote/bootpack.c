@@ -1,6 +1,7 @@
 #include "bootpack.h"
 
 extern struct FIFO8 keyfifo,mousefifo;
+extern struct TIMERCTL timerctl;
 
 void HariMain(void)
 {
@@ -16,9 +17,6 @@ void HariMain(void)
 	struct SHTCTL *shtctl;
 	struct SHEET *sht_back, *sht_mouse, *sht_win;
 	unsigned char *buf_back, buf_mouse[256], *buf_win;
-	// counter
-	unsigned int count = 0;
-
 	
 
 	init_gdtidt();
@@ -67,8 +65,7 @@ void HariMain(void)
 	sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 
 	for(;;) {
-		count++;
-		sprintf(s, "%d", count);
+		sprintf(s, "%d", timerctl.count);
 		boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
 		putfonts8_asc(buf_win, 160, 40, 28, COL8_000000, s);
 		sheet_refresh(sht_win, 40,28,120,44);
