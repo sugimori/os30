@@ -2,6 +2,8 @@
 
 extern struct FIFO8 keyfifo,mousefifo;
 extern struct TIMERCTL timerctl;
+void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length);
+
 
 void HariMain(void)
 {
@@ -85,9 +87,7 @@ void HariMain(void)
 	
 	for(;;) {
 		sprintf(s, "%d", timerctl.count);
-		boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
-		putfonts8_asc(buf_win, 160, 40, 28, COL8_000000, s);
-		sheet_refresh(sht_win, 40,28,120,44);
+		putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
 
 		io_cli(); // 割り込み禁止
 		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo) 
@@ -98,9 +98,7 @@ void HariMain(void)
 				i = fifo8_get(&keyfifo);
 				io_sti(); // 割り込み開始
 				sprintf(s, "%x", i);
-				boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 16, 15, 31);
-				putfonts8_asc(buf_back, binfo->scrnx, 0, 16, COL8_FFFFFF, s);
-				sheet_refresh(sht_back, 0, 16, 16, 32);
+				putfonts8_asc_sht(sht_back,0,16,COL8_FFFFFF,COL8_008484,s,2);
 			} else if (fifo8_status(&mousefifo) != 0) {
 				i = fifo8_get(&mousefifo);
 				io_sti();
@@ -115,9 +113,7 @@ void HariMain(void)
 					if((mdec.btn & 0x04) != 0) {
 						s[2] = 'C';
 					}
-					boxfill8(buf_back, binfo->scrnx, COL8_008484, 32, 16, 32 + 15*8 -1 , 31);
-					putfonts8_asc(buf_back, binfo->scrnx, 32, 16, COL8_FFFFFF, s);
-					sheet_refresh(sht_back, 32,16, 32 + 15 * 8, 32);
+					putfonts8_asc_sht(sht_back,32,16,COL8_FFFFFF,COL8_008484,s,15);
 
 					// マウスカーソルの移動
 					mx += mdec.x;
@@ -127,22 +123,18 @@ void HariMain(void)
 					if(mx > binfo->scrnx - 1) mx = binfo->scrnx -1;
 					if(my > binfo->scrny - 1) my = binfo->scrny -1;
 					sprintf(s, "(%d, %d)", mx, my);
-					boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 0, 8*12 -1, 15); // 座標消す
-					putfonts8_asc(buf_back, binfo->scrnx, 0, 0, COL8_FFFFFF, s); // 座標書く
-					sheet_refresh(sht_back, 0,0,8*12,16);
+					putfonts8_asc_sht(sht_back,0,0,COL8_FFFFFF,COL8_008484,s,12);
 					sheet_slide(sht_mouse,mx,my);
 				}
 
 			} else if (fifo8_status(&timerfifo) != 0) {
 				i = fifo8_get(&timerfifo);
 				io_sti();
-				putfonts8_asc(buf_back, binfo->scrnx, 0, 64, COL8_FFFFFF, "10[sec]");
-				sheet_refresh(sht_back, 0, 64,56,80);
+				putfonts8_asc_sht(sht_back,0,64,COL8_FFFFFF,COL8_008484,"10[sec]",7);
 			} else if (fifo8_status(&timerfifo2) != 0) {
 				i = fifo8_get(&timerfifo2);
 				io_sti();
-				putfonts8_asc(buf_back, binfo->scrnx, 0, 80, COL8_FFFFFF, "3[sec]");
-				sheet_refresh(sht_back, 0, 80,48,96);
+				putfonts8_asc_sht(sht_back,0,80,COL8_FFFFFF,COL8_008484,"3[sec]",6);
 			} else if (fifo8_status(&timerfifo3) != 0) {
 				i = fifo8_get(&timerfifo3);
 				io_sti();
@@ -158,5 +150,13 @@ void HariMain(void)
 			}
 		}
 	}
+	return;
+}
+
+void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length)
+{
+	boxfill8(sht->buf, sht->bxsize,backcolor,x,y,x+length*8-1,y+15);
+	putfonts8_asc(sht->buf,sht->bxsize,x,y,color,s);
+	sheet_refresh(sht,x,y,x+length*8,y+16);
 	return;
 }
