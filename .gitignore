@@ -5,6 +5,8 @@ fdimage0.bin
 */*/bootpack.hrb
 */*/*.lst
 */*/*.bin
+*.lst
+*.bin
 */*/*.o
 */*/haribote.sys
 ZZ_day/haribote/hankaku.c
