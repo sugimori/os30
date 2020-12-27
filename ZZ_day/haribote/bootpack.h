@@ -207,14 +207,15 @@ void timer_settime(struct TIMER *timer, unsigned int timeout);
 #define MAX_TIMER 	500
 
 struct TIMER {
+	struct TIMER *next_timer;
 	unsigned int timeout,flags;
 	struct FIFO32 *fifo;
 	int data;
 };
 struct TIMERCTL
 {
-	unsigned int count, next, using;
-	struct TIMER *timers[MAX_TIMER];	// 使用中
+	unsigned int count, next_time, using;
+	struct TIMER *t0;	// 使用中
 	struct TIMER timers0[MAX_TIMER];
 };
 
