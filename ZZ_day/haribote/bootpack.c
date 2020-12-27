@@ -9,7 +9,7 @@ void HariMain(void)
 {
 	struct BOOTINFO *binfo = (struct BOOTINFO *)ADR_BOOTINFO;
 	char s[40], mcursor[256], keybuf[32], mousebuf[128], timerbuf[8], timerbuf2[8], timerbuf3[8];
-	int mx, my, i;
+	int mx, my, i, count=0;
 	unsigned char mouse_dbuf[3], mouse_phase;
 	struct MOUSE_DEC mdec;
 	// memory関連宣言
@@ -84,8 +84,10 @@ void HariMain(void)
 
 	
 	for(;;) {
-		sprintf(s, "%d", timerctl.count);
-		putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
+		count++;
+		// sprintf(s, "%d", timerctl.count);
+		// putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
+		putfonts8_asc_sht(sht_back, 0,120,COL8_000000,COL8_C6C6C6,"dummy", 10);	// ダミー
 
 		io_cli(); // 割り込み禁止
 		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo) + fifo8_status(&timerfifo) == 0) {
@@ -129,8 +131,11 @@ void HariMain(void)
 				io_sti();
 				if(i==10) {
 					putfonts8_asc_sht(sht_back,0,64,COL8_FFFFFF,COL8_008484,"10[sec]",7);
+					sprintf(s,"%d", count);
+					putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
 				} else if(i==3) {
 					putfonts8_asc_sht(sht_back,0,80,COL8_FFFFFF,COL8_008484,"3[sec]",6);
+					count = 0;
 				} else {
 					if(i!=0) {
 						timer_init(timer3, &timerfifo, 0); 
