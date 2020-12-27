@@ -87,11 +87,11 @@ void HariMain(void)
 		count++;
 		// sprintf(s, "%d", timerctl.count);
 		// putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
-		putfonts8_asc_sht(sht_back, 0,120,COL8_000000,COL8_C6C6C6,"dummy", 10);	// ダミー
+		// putfonts8_asc_sht(sht_back, 0,120,COL8_000000,COL8_C6C6C6,"dummy", 10);	// ダミー
 
 		io_cli(); // 割り込み禁止
 		if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo) + fifo8_status(&timerfifo) == 0) {
-			io_sti(); // 割り込み開始
+			io_stihlt(); // 割り込み開始
 		} else {
 			if(fifo8_status(&keyfifo) != 0) {
 				i = fifo8_get(&keyfifo);
