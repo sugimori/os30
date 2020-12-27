@@ -4,8 +4,10 @@ fdimage0.bin
 */*/haribote.img
 */*/bootpack.hrb
 */*/*.lst
+*/*/*.bin
 */*/*.o
 */*/haribote.sys
 ZZ_day/haribote/hankaku.c
 .vscode/settings.json
 ZZ_day/haribote/asmhead.lst
+ZZ_day/haribote/asmhead.bin
