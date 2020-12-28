@@ -86,7 +86,7 @@ void HariMain(void)
 	putfonts8_asc(buf_back, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
 	sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 	unsigned long vramaddr = (unsigned long)(binfo->vram);
-	sprintf(s, "minus = 0x%l", vramaddr);
+	sprintf(s, "VRAM = 0x%l", vramaddr);
 	putfonts8_asc_sht(sht_back, 0, 150, COL8_FFFFFF, COL8_008484, s, 80);
 	
 	for(;;) {
