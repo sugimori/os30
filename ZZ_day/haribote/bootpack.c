@@ -10,7 +10,7 @@ void HariMain(void)
 	struct FIFO32 fifo;
 	int fifobuf[128];
 	char s[40], mcursor[256];
-	int mx, my, i, count=0;
+	int mx, my, i;
 	unsigned char mouse_dbuf[3], mouse_phase;
 	struct MOUSE_DEC mdec;
 	// memory関連宣言
@@ -64,7 +64,7 @@ void HariMain(void)
 	sheet_setbuf(sht_win, buf_win, 160, 52, -1); // 透明色なし
 	init_screen8(buf_back,binfo->scrnx,binfo->scrny); // 背景初期化
 	init_mouse_cursor8(buf_mouse, 99);  // マウス初期化
-	make_window8(buf_win,160,52,"counter");
+	make_window8(buf_win,160,52,"window");
 	sheet_slide(sht_back, 0,0); // 背景の位置を設定
 	mx = (binfo->scrnx - 16) / 2; /* 画面中央になるように座標計算 */
 	my = (binfo->scrny - 28 - 16) / 2;
@@ -84,21 +84,32 @@ void HariMain(void)
 	putfonts8_asc_sht(sht_back, 0, 150, COL8_FFFFFF, COL8_008484, s, 80);
 	
 	for(;;) {
-		count++;
-		// sprintf(s, "%d", timerctl.count);
-		// putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
-		putfonts8_asc_sht(sht_back, 0,120,COL8_000000,COL8_C6C6C6,"dummy", 10);	// ダミー
-
 		io_cli(); // 割り込み禁止
 		if(fifo32_status(&fifo) == 0) {
-			// io_stihlt(); // 早すぎるので、HLTを入れるパターン
-			io_sti(); // 割り込み開始
+			io_stihlt(); // 早すぎるので、HLTを入れるパターン
 		} else {
 			i = fifo32_get(&fifo);
 			io_sti(); // 割り込み開始
+			static char keytable[0x54] = {
+				  0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0,   0,
+				'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[',   0,   0, 
+				'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', ':',   0,   0, ']',
+				'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/',   0, '*',   0, ' ',
+				  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, '7',
+				'8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '*'
+			};
+
 			if(256 <= i && i <= 511) { // キーボード
 				sprintf(s, "%x", i - 256);
 				putfonts8_asc_sht(sht_back,0,16,COL8_FFFFFF,COL8_008484,s,2);
+				if(i - 256 < 0x54) {
+					if(keytable[i-256] != 0) {
+						s[0] = keytable[i-256];
+						s[1] = 0;
+						putfonts8_asc_sht(sht_win, 40, 28, COL8_000000, COL8_C6C6C6, s, 1);
+				
+					}
+				}
 
 			} else if (512 <= i && i <= 767) { // マウス
 				if(mouse_decode(&mdec, i - 512) != 0) {
@@ -128,11 +139,8 @@ void HariMain(void)
 
 			} else if (i==10) {
 				putfonts8_asc_sht(sht_back,0,64,COL8_FFFFFF,COL8_008484,"10[sec]",7);
-				sprintf(s,"%d", count);
-				putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
 			} else if(i==3) {
 				putfonts8_asc_sht(sht_back,0,80,COL8_FFFFFF,COL8_008484,"3[sec]",6);
-				count = 0;
 			} else if(i==1) {
 				timer_init(timer3, &fifo, 0);  // 次は0
 				boxfill8(buf_back, binfo->scrnx,COL8_FFFFFF, 8, 96,15,111);
