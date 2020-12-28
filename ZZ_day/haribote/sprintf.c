@@ -34,6 +34,11 @@ int dec2asc (char *str, int dec, int zero) {
 int hex2asc (char *str, int dec) { //10で割れた回数（つまり桁数）をlenに、各桁をbufに格納
     int len = 0, len_buf; //桁数
     int buf[10];
+    int minus = 0;
+    if( dec < 0) {
+        minus = 1;
+        dec *= -1;
+    }
     while (1) {
         buf[len++] = dec % 16;
         if (dec < 16) break;
@@ -46,7 +51,29 @@ int hex2asc (char *str, int dec) { //10で割れた回数（つまり桁数）�
     }
     return len_buf;
 }
- 
+
+//16進数からASCIIコードに変換
+int hex2asclong (char *str, unsigned long dec) { //10で割れた回数（つまり桁数）をlenに、各桁をbufに格納
+    int len = 0, len_buf; //桁数
+    unsigned long  buf[32];
+    int minus = 0;
+    // if( dec < 0) {
+    //     minus = 1;
+    //     dec *= -1;
+    // }
+    while (1) {
+        buf[len++] = dec % 16;
+        if (dec < 16) break;
+        dec /= 16;
+    }
+    len_buf = len;
+    while (len) {
+        len --;
+        *(str++) = (buf[len]<10)?(buf[len] + 0x30):(buf[len] - 9 + 0x60);
+    }
+    return len_buf;
+}
+
 int sprintf (char *str, char *fmt, ...) {
     va_list list;
     int i, len;
@@ -61,6 +88,9 @@ int sprintf (char *str, char *fmt, ...) {
                     break;
                 case 'x':
                     len = hex2asc(str, va_arg (list, int));
+                    break;
+                case 'l':
+                    len = hex2asclong(str, va_arg(list, unsigned long));
                     break;
             }
             str += len; fmt++;

@@ -79,17 +79,20 @@ void HariMain(void)
 	sprintf(s,"memory %dMB    free : %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
 	putfonts8_asc(buf_back, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
 	sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
-
+	unsigned long vramaddr = (unsigned long)(binfo->vram);
+	sprintf(s, "minus = 0x%l", vramaddr);
+	putfonts8_asc_sht(sht_back, 0, 150, COL8_FFFFFF, COL8_008484, s, 80);
 	
 	for(;;) {
 		count++;
 		// sprintf(s, "%d", timerctl.count);
 		// putfonts8_asc_sht(sht_win, 40,28,COL8_000000,COL8_C6C6C6,s, 10);
-		// putfonts8_asc_sht(sht_back, 0,120,COL8_000000,COL8_C6C6C6,"dummy", 10);	// ダミー
+		putfonts8_asc_sht(sht_back, 0,120,COL8_000000,COL8_C6C6C6,"dummy", 10);	// ダミー
 
 		io_cli(); // 割り込み禁止
 		if(fifo32_status(&fifo) == 0) {
-			io_stihlt(); // 割り込み開始
+			// io_stihlt(); // 早すぎるので、HLTを入れるパターン
+			io_sti(); // 割り込み開始
 		} else {
 			i = fifo32_get(&fifo);
 			io_sti(); // 割り込み開始
