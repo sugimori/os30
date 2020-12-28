@@ -15,7 +15,7 @@ VRAM	EQU		0x0ff8			; グラフィックバッファの開始番地
 
 		ORG		0xc200			; このプログラムがどこに読み込まれるのか
 
-VBEMODE	EQU		0x103
+VBEMODE	EQU		0x101
 ;0x100 ： 640x 400 - 8bit
 ;0x101 ： 640x 480 - 8bit
 ;0x102 ： 800x 600 - 4bit (VGA-compatible)
