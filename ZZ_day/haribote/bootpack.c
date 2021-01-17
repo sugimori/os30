@@ -2,7 +2,7 @@
 
 extern struct TIMERCTL timerctl;
 void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length);
-
+void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
 
 void HariMain(void)
 {
