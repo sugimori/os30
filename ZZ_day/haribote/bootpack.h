@@ -17,6 +17,7 @@ int load_cr0(void);
 void store_cr0(int cr0);
 void load_tr(int tr);
 void taskswitch4(void);
+void taskswitch3(void);
 
 /* asmhead.nas */
 struct BOOTINFO {

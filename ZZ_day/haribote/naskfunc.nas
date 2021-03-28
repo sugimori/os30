@@ -18,7 +18,7 @@
 		GLOBAL	load_gdtr, load_idtr
 		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c
 		GLOBAL	load_cr0, store_cr0
-		GLOBAL	load_tr, taskswitch4
+		GLOBAL	load_tr, taskswitch4, taskswitch3
 		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27
 
 
@@ -180,4 +180,7 @@ load_tr:	; void load_tr(int tr);
 
 taskswitch4:	; void taskswitch4(void);
 	JMP		4*8:0
+	RET
+taskswitch3:	; void taskswitch3(void);
+	JMP		3*8:0
 	RET
