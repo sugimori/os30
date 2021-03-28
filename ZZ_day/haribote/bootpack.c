@@ -93,6 +93,8 @@ void HariMain(void)
 	init_palette();
 	shtctl = shtctl_init(memman, binfo->vram, binfo->scrnx, binfo->scrny);
 	sht_back = sheet_alloc(shtctl);
+	*((int *) 0x0fec) = (int) sht_back;
+
 	sht_mouse = sheet_alloc(shtctl);
 	sht_win = sheet_alloc(shtctl);
 	buf_back = (unsigned char *)memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
@@ -245,7 +247,11 @@ void task_b_main(void)
 {
 	struct FIFO32 fifo;
 	struct TIMER *timer_ts;
-	int i, fifobuf[128];
+	int i, fifobuf[128], count = 0;
+	char s[11];
+	struct SHEET *sht_back;
+
+	sht_back = (struct SHEET *) *((int *) 0x0fec);
 
 	fifo32_init(&fifo, 128, fifobuf);
 	timer_ts = timer_alloc();
@@ -253,6 +259,9 @@ void task_b_main(void)
 	timer_settime(timer_ts, 2);
 
 	for(;;) {
+		count++;
+		sprintf(s, "%10d", count);
+		putfonts8_asc_sht(sht_back, 0, 180, COL8_FFFFFF, COL8_008484, s, 10);
 		io_cli();
 		if(fifo32_status(&fifo) == 0) {
 			io_stihlt();
