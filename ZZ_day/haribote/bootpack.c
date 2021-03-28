@@ -3,6 +3,8 @@
 extern struct TIMERCTL timerctl;
 void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length);
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
+void task_b_main(void);
+
 
 void HariMain(void)
 {
@@ -24,6 +26,8 @@ void HariMain(void)
 	struct TIMER *timer, *timer2, *timer3;
 	// cursor
 	int cursor_x, cursor_c;
+	//マルチタスク
+	struct TSS32 tss_a, tss_b;
 	
 
 	init_gdtidt();
@@ -53,6 +57,34 @@ void HariMain(void)
 	memman_init(memman);
 	memman_free(memman, 0x00001000, 0x0009e000);
 	memman_free(memman, 0x00400000, memtotal - 0x00400000);
+
+	// multitask
+	tss_a.ldtr = 0;
+	tss_a.iomap = 0x40000000;
+	tss_b.ldtr = 0;
+	tss_b.iomap = 0x40000000;
+	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR * )	ADR_GDT;
+	set_segmdesc(gdt +  3,103, (int) &tss_a, AR_TSS32);
+	set_segmdesc(gdt +  4,103, (int) &tss_b, AR_TSS32);
+	load_tr(3 * 8);
+	int task_b_esp;
+	task_b_esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
+	tss_b.eip = (int)&task_b_main;
+	tss_b.eflags = 0x00000202; // IF=1;
+	tss_b.eax = 0;
+	tss_b.ecx = 0;
+	tss_b.edx = 0;
+	tss_b.ebx = 0;
+	tss_b.esp = task_b_esp;
+	tss_b.ebp = 0;
+	tss_b.esi = 0;
+	tss_b.edi = 0;
+	tss_b.es = 1 * 8;
+	tss_b.cs = 2 * 8;
+	tss_b.ss = 1 * 8;
+	tss_b.ds = 1 * 8;
+	tss_b.fs = 1 * 8;
+	tss_b.gs = 1 * 8;
 
 	init_palette();
 	shtctl = shtctl_init(memman, binfo->vram, binfo->scrnx, binfo->scrny);
@@ -156,8 +188,9 @@ void HariMain(void)
 					}
 				}
 
-			} else if (i==10) {
+			} else if (i==10) { // 10sec timer
 				putfonts8_asc_sht(sht_back,0,64,COL8_FFFFFF,COL8_008484,"10[sec]",7);
+				taskswitch4();
 			} else if(i==3) {
 				putfonts8_asc_sht(sht_back,0,80,COL8_FFFFFF,COL8_008484,"3[sec]",6);
 			} else if(i <= 1) { // カーソル用タイマ
@@ -200,4 +233,9 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 
 
 	return;
+}
+
+void task_b_main(void)
+{
+	for(;;) { io_hlt();}
 }
