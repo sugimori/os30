@@ -77,23 +77,45 @@ int hex2asclong (char *str, unsigned long dec) { //10で割れた回数（つま
 int sprintf (char *str, char *fmt, ...) {
     va_list list;
     int i, len;
+    int count=0;
     va_start (list, fmt);
  
     while (*fmt) {
+        int infmt = 0;
         if(*fmt=='%') {
-            fmt++;
-            switch(*fmt){
-                case 'd':
-                    len = dec2asc(str, va_arg (list, int), 4);
-                    break;
-                case 'x':
-                    len = hex2asc(str, va_arg (list, int));
-                    break;
-                case 'l':
-                    len = hex2asclong(str, va_arg(list, unsigned long));
-                    break;
+            infmt = 1;
+            count = 0;
+            while(infmt) {
+                fmt++;
+                switch(*fmt){
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                    case '0':
+                        count = 10*count + *fmt - '0';
+                        break;
+                    case 'd':
+                        len = dec2asc(str, va_arg (list, int), count);
+                        infmt = 0;
+                        break;
+                    case 'x':
+                        len = hex2asc(str, va_arg (list, int));
+                        infmt = 0;
+                        break;
+                    case 'l':
+                        len = hex2asclong(str, va_arg(list, unsigned long));
+                        infmt = 0;
+                        break;
+                }
+                str += len; 
             }
-            str += len; fmt++;
+            fmt++;
         } else {
             *(str++) = *(fmt++);
         }   
