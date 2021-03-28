@@ -19,7 +19,7 @@ int dec2asc (char *str, int dec, int zero) {
     } else {
         len_buf = zero;
         while(zero > len + minus) {
-            *(str++) = ' ';
+            *(str++) = '_';
             zero--;
         }
     }
@@ -76,7 +76,7 @@ int hex2asclong (char *str, unsigned long dec) { //10で割れた回数（つま
 
 int sprintf (char *str, char *fmt, ...) {
     va_list list;
-    int i, len;
+    int i, len=0;
     int count=0;
     va_start (list, fmt);
  
@@ -113,8 +113,8 @@ int sprintf (char *str, char *fmt, ...) {
                         infmt = 0;
                         break;
                 }
-                str += len; 
             }
+            str += len; 
             fmt++;
         } else {
             *(str++) = *(fmt++);
