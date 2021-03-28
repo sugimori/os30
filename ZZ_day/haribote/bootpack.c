@@ -4,7 +4,7 @@ extern struct TIMERCTL timerctl;
 void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length);
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
 void task_b_main(struct SHEET *sht_back);
-
+extern struct TIMER *mt_timer;
 
 
 void HariMain(void)
@@ -24,7 +24,7 @@ void HariMain(void)
 	struct SHEET *sht_back, *sht_mouse, *sht_win;
 	unsigned char *buf_back, buf_mouse[256], *buf_win;
 	// timer
-	struct TIMER *timer, *timer2, *timer3, *timer_ts;
+	struct TIMER *timer, *timer2, *timer3;
 	// cursor
 	int cursor_x, cursor_c;
 	//マルチタスク
@@ -52,9 +52,6 @@ void HariMain(void)
 	timer3 = timer_alloc();
 	timer_init(timer3, &fifo, 1);
 	timer_settime(timer3, 50);
-	timer_ts = timer_alloc();
-	timer_init(timer_ts, &fifo, 2);
-	timer_settime(timer_ts, 2);
 
 	/* メモリチェック */
 	memtotal = memtest(0x00400000, 0xbfffffff);
@@ -89,6 +86,7 @@ void HariMain(void)
 	tss_b.ds = 1 * 8;
 	tss_b.fs = 1 * 8;
 	tss_b.gs = 1 * 8;
+	mt_init();
 	
 
 	init_palette();
@@ -144,10 +142,7 @@ void HariMain(void)
 				'8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '*'
 			};
 
-			if( i == 2) {
-				farjmp(0, 4*8);
-				timer_settime(timer_ts, 2);
-			} else if(256 <= i && i <= 511) { // キーボード
+			if(256 <= i && i <= 511) { // キーボード
 				sprintf(s, "%x", i - 256);
 				putfonts8_asc_sht(sht_back,0,16,COL8_FFFFFF,COL8_008484,s,2);
 				if(i - 256 < 0x54) {
@@ -247,14 +242,11 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 void task_b_main(struct SHEET *sht_back)
 {
 	struct FIFO32 fifo;
-	struct TIMER *timer_ts, *timer_put, *timer_1s;
+	struct TIMER *timer_put, *timer_1s;
 	int i, fifobuf[128], count = 0, count0 = 0;
 	char s[20];
 
 	fifo32_init(&fifo, 128, fifobuf);
-	timer_ts = timer_alloc();
-	timer_init(timer_ts, &fifo, 2);
-	timer_settime(timer_ts, 2);
 	timer_put = timer_alloc();
 	timer_init(timer_put, &fifo, 1);
 	timer_settime(timer_put, 1);
@@ -279,9 +271,6 @@ void task_b_main(struct SHEET *sht_back)
 				sprintf(s, "%11d", count);
 				putfonts8_asc_sht(sht_back, 0, 180, COL8_FFFFFF, COL8_008484, s, 11);
 				timer_settime(timer_put, 1);
-			} else if ( i == 2 ) {
-				farjmp(0, 3 * 8);
-				timer_settime(timer_ts, 2);
 			} else if ( i == 100 ) {
 				sprintf(s, "SPEED:%11d", count - count0);
 				putfonts8_asc_sht(sht_back, 0, 200, COL8_FFFFFF, COL8_008484, s, 17);

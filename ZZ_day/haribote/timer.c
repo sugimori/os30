@@ -4,6 +4,8 @@
 struct TIMERCTL timerctl;
 #define TIMER_FLAGS_ALLOC   1 /* 確保済 */
 #define TIMER_FLAGS_USING   2 /* タイマ作動中 */
+extern struct TIMER *mt_timer;
+
 
 void init_pit(void)
 {
@@ -83,6 +85,7 @@ void timer_settime(struct TIMER *timer, unsigned int timeout)
 
 void inthandler20(int *esp)
 {
+    char ts = 0;
     struct TIMER *timer;
     io_out8(PIC0_OCW2, 0x60); /* IRQ-00受付完了をPICに通知 */
     timerctl.count++;
@@ -96,12 +99,19 @@ void inthandler20(int *esp)
         }
         // タイムアウト
         timer->flags = TIMER_FLAGS_ALLOC;
-        fifo32_put(timer->fifo,timer->data);
+        if ( timer != mt_timer) {
+            fifo32_put(timer->fifo,timer->data);
+        } else {
+            ts = 1; // mt_timerがタイムアウトした
+        }
         timer = timer->next_timer; // 次のタイマーをtimer に代入
     }
     // ずらし
     timerctl.t0 = timer; // 残りのタイマの先頭をtimersの最初にセット
     // timerctl.nextの設定
     timerctl.next_time = timerctl.t0->timeout;
+    if (ts != 0) {
+        mt_taskswitch();
+    }
     return;
 }

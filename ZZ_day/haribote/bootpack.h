@@ -230,3 +230,7 @@ struct TSS32 {
 	int es, cs, ss, ds, fs, gs;
 	int ldtr, iomap;
 };
+
+/* mtask.c */
+void mt_init(void);
+void mt_taskswitch(void);
