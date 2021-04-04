@@ -39,7 +39,8 @@ void putfonts8_asc(char *vram, int xsize, int x, int y, char color, unsigned cha
 int sprintf (char *str, char *fmt, ...);
 void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
 void init_mouse_cursor8(char *mouse, char bc) ;
-void make_window8(unsigned char *buf, int xsize, int ysize, char *title);
+void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);
+
 
 
 /* カラーパレットの定義 */
