@@ -12,7 +12,7 @@ void fifo8_init(struct FIFO8 *fifo, int size, unsigned char *buf)
     fifo->q = 0;
     return;
 }
-void fifo32_init(struct FIFO32 *fifo, int size, int *buf)
+void fifo32_init(struct FIFO32 *fifo, int size, int *buf, struct TASK *task)
 {
     fifo->size = size;
     fifo->buf = buf;
@@ -20,6 +20,7 @@ void fifo32_init(struct FIFO32 *fifo, int size, int *buf)
     fifo->flags = 0;
     fifo->p = 0;
     fifo->q = 0;
+    fifo->task = task; // データが入ったときに起こすタスク
     return;
 }
 
@@ -49,6 +50,11 @@ int fifo32_put(struct FIFO32 *fifo, int data)
         fifo->p = 0;
     }
     fifo->free--;
+    if(fifo->task != 0) {
+        if(fifo->task->flags != 2) {    // 寝ていたら
+            task_run(fifo->task);   // 起こす
+        }
+    }
     return 0;
 }
 

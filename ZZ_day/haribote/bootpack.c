@@ -28,14 +28,14 @@ void HariMain(void)
 	// cursor
 	int cursor_x, cursor_c;
 	//マルチタスク
-	struct TASK *task_b;
+	struct TASK *task_a, *task_b;
 	
 
 	init_gdtidt();
 	init_pic();
 	io_sti(); /* IDT/PICの初期化が終わったのでCPUの割り込み禁止を解除 */
 	// FIFO初期化
-	fifo32_init(&fifo, 32, fifobuf);
+	fifo32_init(&fifo, 32, fifobuf,0);
 	init_keyboard(&fifo, 256);
 	enable_mouse(&fifo,512,&mdec);
 	init_pit();
@@ -87,7 +87,8 @@ void HariMain(void)
 	sheet_updown(sht_mouse, 2);
 
 	// multitask
-	task_init(memman);
+	task_a = task_init(memman);
+	fifo.task = task_a;
 	task_b = task_alloc();
 	task_b->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
 	task_b->tss.eip = (int)&task_b_main;
@@ -113,6 +114,7 @@ void HariMain(void)
 	for(;;) {
 		io_cli(); // 割り込み禁止
 		if(fifo32_status(&fifo) == 0) {
+			task_sleep(task_a);
 			io_stihlt(); // 早すぎるので、HLTを入れるパターン
 		} else {
 			i = fifo32_get(&fifo);
@@ -230,7 +232,7 @@ void task_b_main(struct SHEET *sht_back)
 	int i, fifobuf[128], count = 0, count0 = 0;
 	char s[20];
 
-	fifo32_init(&fifo, 128, fifobuf);
+	fifo32_init(&fifo, 128, fifobuf,0);
 	timer_put = timer_alloc();
 	timer_init(timer_put, &fifo, 1);
 	timer_settime(timer_put, 1);
