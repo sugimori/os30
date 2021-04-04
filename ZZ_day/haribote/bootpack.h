@@ -224,6 +224,8 @@ struct TIMERCTL
 	struct TIMER timers0[MAX_TIMER];
 };
 
+#define MAX_TASKS		1000	// 最大タスク数
+#define TASK_GDT0		3		// TSSをGDTの何番から割り当てるか
 struct TSS32 {
 	int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
 	int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi ,edi;
@@ -231,6 +233,21 @@ struct TSS32 {
 	int ldtr, iomap;
 };
 
+struct TASK {
+	int sel;	// GDTの番号
+	int flags;
+	struct TSS32 tss;
+};
+
+struct TASKCTL {
+	int running;	// 動作しているタスクの数
+	int now;		// 現在動作しているタスク
+	struct TASK *tasks[MAX_TASKS];
+	struct TASK task0[MAX_TASKS];
+};
+
 /* mtask.c */
-void mt_init(void);
-void mt_taskswitch(void);
+struct TASK *task_init(struct MEMMAN *memman) ;
+struct TASK *task_alloc(void);
+void task_run(struct TASK *task) ;
+void task_switch(void) ;

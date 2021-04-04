@@ -4,7 +4,7 @@ extern struct TIMERCTL timerctl;
 void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length);
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
 void task_b_main(struct SHEET *sht_back);
-extern struct TIMER *mt_timer;
+extern struct TIMER *task_timer;
 
 
 void HariMain(void)
@@ -28,7 +28,7 @@ void HariMain(void)
 	// cursor
 	int cursor_x, cursor_c;
 	//マルチタスク
-	struct TSS32 tss_a, tss_b;
+	struct TASK *task_b;
 	
 
 	init_gdtidt();
@@ -59,41 +59,10 @@ void HariMain(void)
 	memman_free(memman, 0x00001000, 0x0009e000);
 	memman_free(memman, 0x00400000, memtotal - 0x00400000);
 
-	// multitask
-	tss_a.ldtr = 0;
-	tss_a.iomap = 0x40000000;
-	tss_b.ldtr = 0;
-	tss_b.iomap = 0x40000000;
-	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR * )	ADR_GDT;
-	set_segmdesc(gdt +  3,103, (int) &tss_a, AR_TSS32);
-	set_segmdesc(gdt +  4,103, (int) &tss_b, AR_TSS32);
-	load_tr(3 * 8);
-	int task_b_esp;
-	task_b_esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
-	tss_b.eip = (int)&task_b_main;
-	tss_b.eflags = 0x00000202; // IF=1;
-	tss_b.eax = 0;
-	tss_b.ecx = 0;
-	tss_b.edx = 0;
-	tss_b.ebx = 0;
-	tss_b.esp = task_b_esp;
-	tss_b.ebp = 0;
-	tss_b.esi = 0;
-	tss_b.edi = 0;
-	tss_b.es = 1 * 8;
-	tss_b.cs = 2 * 8;
-	tss_b.ss = 1 * 8;
-	tss_b.ds = 1 * 8;
-	tss_b.fs = 1 * 8;
-	tss_b.gs = 1 * 8;
-	mt_init();
-	
 
 	init_palette();
 	shtctl = shtctl_init(memman, binfo->vram, binfo->scrnx, binfo->scrny);
 	sht_back = sheet_alloc(shtctl);
-	*((int *) (task_b_esp + 4)) = (int) sht_back;
-
 	sht_mouse = sheet_alloc(shtctl);
 	sht_win = sheet_alloc(shtctl);
 	buf_back = (unsigned char *)memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
@@ -116,6 +85,21 @@ void HariMain(void)
 	sheet_updown(sht_back, 0);	// 背景は０固定？
 	sheet_updown(sht_win, 1);
 	sheet_updown(sht_mouse, 2);
+
+	// multitask
+	task_init(memman);
+	task_b = task_alloc();
+	task_b->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
+	task_b->tss.eip = (int)&task_b_main;
+	task_b->tss.es = 1 * 8;
+	task_b->tss.cs = 2 * 8;
+	task_b->tss.ss = 1 * 8;
+	task_b->tss.ds = 1 * 8;
+	task_b->tss.fs = 1 * 8;
+	task_b->tss.gs = 1 * 8;
+	*((int *) (task_b->tss.esp + 4)) = (int) sht_back;
+	task_run(task_b);
+
 	
 	sprintf(s, "(%d, %d)", mx, my);
 	putfonts8_asc(buf_back, binfo->scrnx, 0, 0, COL8_FFFFFF, s);

@@ -4,7 +4,7 @@
 struct TIMERCTL timerctl;
 #define TIMER_FLAGS_ALLOC   1 /* 確保済 */
 #define TIMER_FLAGS_USING   2 /* タイマ作動中 */
-extern struct TIMER *mt_timer;
+extern struct TIMER *task_timer;
 
 
 void init_pit(void)
@@ -99,7 +99,7 @@ void inthandler20(int *esp)
         }
         // タイムアウト
         timer->flags = TIMER_FLAGS_ALLOC;
-        if ( timer != mt_timer) {
+        if ( timer != task_timer) {
             fifo32_put(timer->fifo,timer->data);
         } else {
             ts = 1; // mt_timerがタイムアウトした
@@ -111,7 +111,7 @@ void inthandler20(int *esp)
     // timerctl.nextの設定
     timerctl.next_time = timerctl.t0->timeout;
     if (ts != 0) {
-        mt_taskswitch();
+        task_switch();
     }
     return;
 }
