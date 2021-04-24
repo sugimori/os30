@@ -228,6 +228,8 @@ struct TIMERCTL
 
 #define MAX_TASKS		1000	// 最大タスク数
 #define TASK_GDT0		3		// TSSをGDTの何番から割り当てるか
+#define MAX_TASKS_LV	100
+#define MAX_TASKLEVELS	10
 struct TSS32 {
 	int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
 	int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi ,edi;
@@ -238,20 +240,30 @@ struct TSS32 {
 struct TASK {
 	int sel;	// GDTの番号
 	int flags;
-	int priority;
+	int level, priority;
 	struct TSS32 tss;
 };
 
-struct TASKCTL {
+struct TASKLEVEL {
 	int running;	// 動作しているタスクの数
 	int now;		// 現在動作しているタスク
-	struct TASK *tasks[MAX_TASKS];
+	struct TASK *tasks[MAX_TASKS_LV];
+};
+
+struct TASKCTL {
+	int now_lv;	// 現在動作中のレベル
+	char lv_change;	// 次回タスクスイッチのときに、レベルも変えた方がいいかどうか
+	struct TASKLEVEL level[MAX_TASKLEVELS];
 	struct TASK task0[MAX_TASKS];
 };
 
 /* mtask.c */
 struct TASK *task_init(struct MEMMAN *memman) ;
 struct TASK *task_alloc(void);
-void task_run(struct TASK *task,int priority) ;
+void task_run(struct TASK *task,int level, int priority) ;
 void task_switch(void) ;
 void task_sleep(struct TASK *task);
+struct TASK *task_now(void);
+void task_add(struct TASK *task);
+void task_remove(struct TASK *task);
+void task_switchsub(void);
