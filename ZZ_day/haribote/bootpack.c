@@ -243,39 +243,6 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 	return;
 }
 
-void task_b_main(struct SHEET *sht_win_b)
-{
-	struct FIFO32 fifo;
-	struct TIMER *timer_1s;
-	int i, fifobuf[128], count = 0, count0 = 0;
-	char s[20];
-
-	fifo32_init(&fifo, 128, fifobuf,0);
-	timer_1s = timer_alloc();
-	timer_init(timer_1s, &fifo, 100);
-	timer_settime(timer_1s, 100);
-
-	for(;;) {
-		count++;
-		io_cli();
-
-		if(fifo32_status(&fifo) == 0) {
-			io_stihlt();
-			// io_sti();
-		} else {
-			i = fifo32_get(&fifo);
-			io_sti();
-			// io_stihlt();
-			if ( i == 100 ) {
-				sprintf(s, "SPEED:%5d", count - count0);
-				putfonts8_asc_sht(sht_win_b, 24, 28, COL8_000000, COL8_C6C6C6, s, 12);
-				count0 = count;
-				timer_settime(timer_1s, 100);
-			}
-		}
-	}
-}
-
 void console_task(struct SHEET *sheet)
 {
 	struct FIFO32 fifo;
