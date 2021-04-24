@@ -242,6 +242,7 @@ struct TASK {
 	int sel;	// GDTの番号
 	int flags;
 	int level, priority;
+	struct FIFO32 fifo;
 	struct TSS32 tss;
 };
 
