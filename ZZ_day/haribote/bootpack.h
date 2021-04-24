@@ -40,6 +40,7 @@ int sprintf (char *str, char *fmt, ...);
 void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
 void init_mouse_cursor8(char *mouse, char bc) ;
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);
+void make_wtitle8(unsigned char *buf, int xsize, char *title, char act);
 
 
 
