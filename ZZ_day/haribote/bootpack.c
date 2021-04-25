@@ -5,13 +5,13 @@ void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
 void console_task(struct SHEET *sheet);
 extern struct TIMER *task_timer;
-
+#define KEYCMD_LED	0xed
 
 void HariMain(void)
 {
 	struct BOOTINFO *binfo = (struct BOOTINFO *)ADR_BOOTINFO;
-	struct FIFO32 fifo;
-	int fifobuf[128];
+	struct FIFO32 fifo, keycmd;
+	int fifobuf[128], keycmd_buf[128];
 	char s[40], mcursor[256];
 	int mx, my, i;
 	unsigned char mouse_dbuf[3], mouse_phase;
@@ -36,6 +36,7 @@ void HariMain(void)
 	io_sti(); /* IDT/PICの初期化が終わったのでCPUの割り込み禁止を解除 */
 	// FIFO初期化
 	fifo32_init(&fifo, 32, fifobuf,0);
+	fifo32_init(&keycmd, 32, keycmd_buf,0);
 	init_keyboard(&fifo, 256);
 	enable_mouse(&fifo,512,&mdec);
 	init_pit();
@@ -118,6 +119,7 @@ void HariMain(void)
 	sprintf(s, "VRAM = 0x%l", vramaddr);
 	putfonts8_asc_sht(sht_back, 0, 150, COL8_FFFFFF, COL8_008484, s, 80);
 
+	// http://oswiki.osask.jp/?%28AT%29keyboard
 	static char keytable0[0x80] = {
 			0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0,   0, // 00-0F
 		'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[',   0,   0, 'A', 'S', // 10-1F
@@ -139,9 +141,19 @@ void HariMain(void)
 			0,   0,   0, '_',   0,   0,   0,   0,   0,   0,   0,   0,   0, '|',   0,   0, // 70-7F
 	};
 	int key_to = 0, key_shift = 0;
+	int key_leds = (binfo->leds >> 4) & 7;	// 1: ScrollLock, 2: NumLock, 4: CapsLock
+	int keycmd_wait = -1;
+	fifo32_put(&keycmd, KEYCMD_LED);
+	fifo32_put(&keycmd, key_leds);
 
 
 	for(;;) {
+		if(fifo32_status(&keycmd) > 0 && keycmd_wait < 0) {
+			// キーボードコントローラーに送るものがあれば送る
+			keycmd_wait = fifo32_get(&keycmd);
+			wait_KBC_sendready();
+			io_out8(PORT_KEYDAT, keycmd_wait);
+		}
 		io_cli(); // 割り込み禁止
 		if(fifo32_status(&fifo) == 0) {
 			task_sleep(task_a);
@@ -153,6 +165,9 @@ void HariMain(void)
 			if(256 <= i && i <= 511) { // キーボード
 				sprintf(s, "%x", i - 256);
 				putfonts8_asc_sht(sht_back,0,16,COL8_FFFFFF,COL8_008484,s,2);
+				sprintf(s, "L:%d", key_leds);
+				putfonts8_asc_sht(sht_back,0,48,COL8_FFFFFF,COL8_008484,s,3);
+
 
 				if(i - 256 < 0x80 ) {	// キーコードを文字コードに変換
 					if(key_shift == 0) {
@@ -163,6 +178,13 @@ void HariMain(void)
 				} else {
 					s[0] = 0;
 				}
+				if('A' <= s[0] && s[0] <= 'Z') {	// 入力がアルファベット
+					if(((key_leds & 4) == 0 && key_shift == 0) 			// CapsLock=OFF & Shift=OFF
+						|| ((key_leds & 4) != 0 && key_shift != 0)) {	// CapsLock=ON & Shift=ON
+							s[0] += 0x20;	// 大文字を小文字に変換
+						}
+				}
+
 				if(s[0] != 0) { // 通常文字
 					if(key_to == 0) {	// タスクAへの入力
 						if(cursor_x < 128) { 
@@ -211,6 +233,29 @@ void HariMain(void)
 				if(i - 256 == 0xb6) {	// 右SHIFT OFF
 					key_shift &= ~2;
 				}
+				if(i - 256 == 0x3a) {	// CapsLock
+					key_leds ^= 4;
+					fifo32_put(&keycmd, KEYCMD_LED);
+					fifo32_put(&keycmd, key_leds);
+				}
+				if(i - 256 == 0x45) {	// NumLock
+					key_leds ^= 2;
+					fifo32_put(&keycmd, KEYCMD_LED);
+					fifo32_put(&keycmd, key_leds);
+				}
+				if(i - 256 == 0x46) {	// ScrollLock
+					key_leds ^= 1;
+					fifo32_put(&keycmd, KEYCMD_LED);
+					fifo32_put(&keycmd, key_leds);
+				}
+				if(i -256 == 0xfa) {	// キーボードが無事デーをう受け取った
+					keycmd_wait = -1;
+				}
+				if(i -256 == 0xfe) {	// キーボードが無事デーをう受け取れなかった
+					wait_KBC_sendready();
+					io_out8(PORT_KEYDAT, keycmd_wait);
+				}
+
 
 				// カーソルの再表示
 				boxfill8(sht_win->buf, sht_win->bxsize, cursor_c, cursor_x, 28, cursor_x + 7, 43);
