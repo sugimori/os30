@@ -28,6 +28,10 @@ struct BOOTINFO {
 };
 #define ADR_BOOTINFO    0x000000ff0
 
+/* sprintf.c */
+int sprintf (char *str, char *fmt, ...);
+/* strcmp.c */
+int strcmp(char *s1, char *s2);
 
 /* graphic.c */
 void init_palette(void);
@@ -36,7 +40,6 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 void init_screen8(unsigned char *vram, int xsize, int ysize);
 void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font);
 void putfonts8_asc(char *vram, int xsize, int x, int y, char color, unsigned char *s);
-int sprintf (char *str, char *fmt, ...);
 void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
 void init_mouse_cursor8(char *mouse, char bc) ;
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);

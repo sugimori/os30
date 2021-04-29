@@ -416,7 +416,7 @@ void console_task(struct SHEET *sheet, unsigned int memtotal)
 					cmdline[cursor_x / 8 - 2] = 0; // 最後の文字を終端
 					cursor_y = cons_newline(cursor_y, sheet);
 					// コマンド実行
-					if(cmdline[0] == 'm' && cmdline[1] == 'e' && cmdline[2] == 'm' && cmdline[3] == 0) {
+					if(strcmp(cmdline, "mem") == 0) {
 						// memコマンド
 						sprintf(s, "total  %dMB", memtotal / (1024 * 1024));
 						putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, s, 30);
@@ -424,7 +424,16 @@ void console_task(struct SHEET *sheet, unsigned int memtotal)
 						sprintf(s, "free %dKB", memman_total(memman) / 1024);
 						putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, s, 30);
 						cursor_y = cons_newline(cursor_y, sheet);
-						cursor_y = cons_newline(cursor_y, sheet);						
+						cursor_y = cons_newline(cursor_y, sheet);	
+					} else if (strcmp(cmdline, "clear") == 0){
+						// clearコマンド
+						for(y = 28; y < 28 + 16 * 8;y++) {
+							for(x = 8; x < 8 + 8 * 30; x++) {
+								sheet->buf[x + y * sheet->bxsize] = COL8_000000;
+							}
+						}
+						sheet_refresh(sheet, 8, 28, 8 + 8 * 30, 28 + 16 * 8);
+						cursor_y = 28;
 					} else if (cmdline[0] != 0) {
 						// コマンドでもなく、空行でもない
 						putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, "Bad command.", 12);
