@@ -19,7 +19,7 @@ int dec2asc (char *str, int dec, int zero) {
     } else {
         len_buf = zero;
         while(zero > len + minus) {
-            *(str++) = '_';
+            *(str++) = ' '; // スペースで埋める
             zero--;
         }
     }
