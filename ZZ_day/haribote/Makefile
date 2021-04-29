@@ -45,6 +45,9 @@ haribote.sys : asmhead.bin bootpack.hrb Makefile
 haribote.img : ipl10.bin haribote.sys Makefile
 	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
 	mcopy -i haribote.img haribote.sys ::
+	mcopy -i haribote.img ipl10.nas ::
+	mcopy -i haribote.img Makefile ::
+# -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
 
 # コマンド
 
