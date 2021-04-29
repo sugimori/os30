@@ -26,7 +26,8 @@ struct BOOTINFO {
 	short scrnx,scrny;
 	char *vram;
 };
-#define ADR_BOOTINFO    0x000000ff0
+#define ADR_BOOTINFO    0x00000ff0
+#define ADR_DISKIMG		0x00100000
 
 /* sprintf.c */
 int sprintf (char *str, char *fmt, ...);
