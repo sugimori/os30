@@ -3,7 +3,8 @@
 extern struct TIMERCTL timerctl;
 void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length);
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
-void console_task(struct SHEET *sheet);
+void console_task(struct SHEET *sheet, unsigned int memtotal);
+int cons_newline(int cursor_y, struct SHEET *sheet);
 extern struct TIMER *task_timer;
 #define KEYCMD_LED	0xed
 
@@ -71,7 +72,7 @@ void HariMain(void)
 	make_textbox8(sht_cons, 8, 28, 240, 128, COL8_000000);
 
 	task_cons = task_alloc();
-	task_cons->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
+	task_cons->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 12;
 	task_cons->tss.eip = (int)&console_task;
 	task_cons->tss.es = 1 * 8;
 	task_cons->tss.cs = 2 * 8;
@@ -80,6 +81,7 @@ void HariMain(void)
 	task_cons->tss.fs = 1 * 8;
 	task_cons->tss.gs = 1 * 8;
 	*((int *) (task_cons->tss.esp + 4)) = (int) sht_cons;
+	*((int *) (task_cons->tss.esp + 8)) = memtotal;
 	task_run(task_cons, 2, 2);	// level=2, priority=2
 
 	// sht_win
@@ -350,14 +352,15 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 	return;
 }
 
-void console_task(struct SHEET *sheet)
+void console_task(struct SHEET *sheet, unsigned int memtotal)
 {
 	struct TIMER *timer;
 	struct TASK *task = task_now();
 
 	int i, fifobuf[128], cursor_x = 16, cursor_y = 28, cursor_c = -1;
-	char s[2];
+	char s[30], cmdline[30];
 	int x,y;
+	struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
 
 	fifo32_init(&task->fifo, 128, fifobuf, task);
 
@@ -410,22 +413,23 @@ void console_task(struct SHEET *sheet)
 					// ENTER
 					// カーソルをスペースで消す
 					putfonts8_asc_sht(sheet, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
-					if (cursor_y < 28 + 16 * 7) {
-						cursor_y += 16;
-					} else {
-						// スクロール
-						for(y = 28; y < 28 + 16 * 7; y++) {
-							for( x = 8; x < 8 + 8 * 30; x++) {
-								sheet->buf[x + y * sheet->bxsize] = sheet->buf[x + (y + 16) * sheet->bxsize];
-							}
-						}
-						// 最後の行は黒で塗りつぶす
-						for(y = 28 + 16 * 7; y < 28 + 16 * 8; y++) {
-							for( x = 8; x < 8 + 8 * 30; x++) {
-								sheet->buf[x + y * sheet->bxsize] = COL8_000000;
-							}
-						}
-						sheet_refresh(sheet, 8,28, 8 + 8 * 30, 28 + 16 * 8);
+					cmdline[cursor_x / 8 - 2] = 0; // 最後の文字を終端
+					cursor_y = cons_newline(cursor_y, sheet);
+					// コマンド実行
+					if(cmdline[0] == 'm' && cmdline[1] == 'e' && cmdline[2] == 'm' && cmdline[3] == 0) {
+						// memコマンド
+						sprintf(s, "total  %dMB", memtotal / (1024 * 1024));
+						putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, s, 30);
+						cursor_y = cons_newline(cursor_y, sheet);
+						sprintf(s, "free %dKB", memman_total(memman) / 1024);
+						putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, s, 30);
+						cursor_y = cons_newline(cursor_y, sheet);
+						cursor_y = cons_newline(cursor_y, sheet);						
+					} else if (cmdline[0] != 0) {
+						// コマンドでもなく、空行でもない
+						putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, "Bad command.", 12);
+						cursor_y = cons_newline(cursor_y, sheet);
+						cursor_y = cons_newline(cursor_y, sheet);						
 					}
 					// プロンプト表示
 					putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, ">", 1);
@@ -435,6 +439,7 @@ void console_task(struct SHEET *sheet)
 					if(cursor_x < 240) {
 						s[0] = i -256;
 						s[1] = 0;
+						cmdline[cursor_x / 8 - 2] = i - 256;
 						putfonts8_asc_sht(sheet, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, s, 1);
 						cursor_x += 8;
 					}
@@ -451,4 +456,27 @@ void console_task(struct SHEET *sheet)
 
 	}
 
+}
+
+int cons_newline(int cursor_y, struct SHEET *sheet) 
+{
+	int x, y;
+	if (cursor_y < 28 + 16 * 7) {
+		cursor_y += 16;
+	} else {
+		// スクロール
+		for(y = 28; y < 28 + 16 * 7; y++) {
+			for( x = 8; x < 8 + 8 * 30; x++) {
+				sheet->buf[x + y * sheet->bxsize] = sheet->buf[x + (y + 16) * sheet->bxsize];
+			}
+		}
+		// 最後の行は黒で塗りつぶす
+		for(y = 28 + 16 * 7; y < 28 + 16 * 8; y++) {
+			for( x = 8; x < 8 + 8 * 30; x++) {
+				sheet->buf[x + y * sheet->bxsize] = COL8_000000;
+			}
+		}
+		sheet_refresh(sheet, 8,28, 8 + 8 * 30, 28 + 16 * 8);
+	}
+	return cursor_y;
 }
