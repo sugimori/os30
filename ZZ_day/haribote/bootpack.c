@@ -111,13 +111,13 @@ void HariMain(void)
 	sheet_updown(sht_win, 2);
 	sheet_updown(sht_mouse, 3);
 	
-	sprintf(s, "(%3d, %3d)", mx, my);
-	putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_008484, s, 10);
-	sprintf(s,"memory %dMB    free : %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
-	putfonts8_asc_sht(sht_back, 0, 32, COL8_FFFFFF, COL8_008484, s, 40);
-	unsigned long vramaddr = (unsigned long)(binfo->vram);
-	sprintf(s, "VRAM = 0x%l", vramaddr);
-	putfonts8_asc_sht(sht_back, 0, 150, COL8_FFFFFF, COL8_008484, s, 80);
+	// sprintf(s, "(%3d, %3d)", mx, my);
+	// putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_008484, s, 10);
+	// sprintf(s,"memory %dMB    free : %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
+	// putfonts8_asc_sht(sht_back, 0, 32, COL8_FFFFFF, COL8_008484, s, 40);
+	// unsigned long vramaddr = (unsigned long)(binfo->vram);
+	// sprintf(s, "VRAM = 0x%l", vramaddr);
+	// putfonts8_asc_sht(sht_back, 0, 150, COL8_FFFFFF, COL8_008484, s, 80);
 
 	// http://oswiki.osask.jp/?%28AT%29keyboard
 	static char keytable0[0x80] = {
@@ -163,10 +163,10 @@ void HariMain(void)
 			io_sti(); // 割り込み開始
 
 			if(256 <= i && i <= 511) { // キーボード
-				sprintf(s, "%x", i - 256);
-				putfonts8_asc_sht(sht_back,0,16,COL8_FFFFFF,COL8_008484,s,2);
-				sprintf(s, "L:%d", key_leds);
-				putfonts8_asc_sht(sht_back,0,48,COL8_FFFFFF,COL8_008484,s,3);
+				// sprintf(s, "%x", i - 256);
+				// putfonts8_asc_sht(sht_back,0,16,COL8_FFFFFF,COL8_008484,s,2);
+				// sprintf(s, "L:%d", key_leds);
+				// putfonts8_asc_sht(sht_back,0,48,COL8_FFFFFF,COL8_008484,s,3);
 
 
 				if(i - 256 < 0x80 ) {	// キーコードを文字コードに変換
@@ -274,17 +274,17 @@ void HariMain(void)
 				sheet_refresh(sht_win, cursor_x, 28, cursor_x + 8, 44);
 			} else if (512 <= i && i <= 767) { // マウス
 				if(mouse_decode(&mdec, i - 512) != 0) {
-					sprintf(s, "[lcr %d %d]", mdec.x, mdec.y);
-					if((mdec.btn & 0x01) != 0) {
-						s[1] = 'L';
-					}
-					if((mdec.btn & 0x02) != 0) {
-						s[3] = 'R';
-					}
-					if((mdec.btn & 0x04) != 0) {
-						s[2] = 'C';
-					}
-					putfonts8_asc_sht(sht_back,32,16,COL8_FFFFFF,COL8_008484,s,15);
+					// sprintf(s, "[lcr %d %d]", mdec.x, mdec.y);
+					// if((mdec.btn & 0x01) != 0) {
+					// 	s[1] = 'L';
+					// }
+					// if((mdec.btn & 0x02) != 0) {
+					// 	s[3] = 'R';
+					// }
+					// if((mdec.btn & 0x04) != 0) {
+					// 	s[2] = 'C';
+					// }
+					// putfonts8_asc_sht(sht_back,32,16,COL8_FFFFFF,COL8_008484,s,15);
 
 					// マウスカーソルの移動
 					mx += mdec.x;
@@ -293,8 +293,8 @@ void HariMain(void)
 					if(my < 0) my = 0;
 					if(mx > binfo->scrnx - 1) mx = binfo->scrnx -1;
 					if(my > binfo->scrny - 1) my = binfo->scrny -1;
-					sprintf(s, "(%d, %d)", mx, my);
-					putfonts8_asc_sht(sht_back,0,0,COL8_FFFFFF,COL8_008484,s,12);
+					// sprintf(s, "(%d, %d)", mx, my);
+					// putfonts8_asc_sht(sht_back,0,0,COL8_FFFFFF,COL8_008484,s,12);
 					sheet_slide(sht_mouse,mx,my);
 					if((mdec.btn & 0x01) != 0) {
 						// 左ボタンを教えていたら動かす
