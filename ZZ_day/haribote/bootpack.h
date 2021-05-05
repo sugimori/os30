@@ -35,38 +35,6 @@ int sprintf (char *str, char *fmt, ...);
 int strcmp(char *s1, char *s2);
 int strncmp(char *s1, char *s2, int n);
 
-/* graphic.c */
-void init_palette(void);
-void set_palette(int start, int end, unsigned char *rgb);
-void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
-void init_screen8(unsigned char *vram, int xsize, int ysize);
-void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font);
-void putfonts8_asc(char *vram, int xsize, int x, int y, char color, unsigned char *s);
-void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
-void init_mouse_cursor8(char *mouse, char bc) ;
-void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);
-void make_wtitle8(unsigned char *buf, int xsize, char *title, char act);
-
-
-
-/* カラーパレットの定義 */
-#define COL8_000000		0
-#define COL8_FF0000		1
-#define COL8_00FF00		2
-#define COL8_FFFF00		3
-#define COL8_0000FF		4
-#define COL8_FF00FF		5
-#define COL8_00FFFF		6
-#define COL8_FFFFFF		7
-#define COL8_C6C6C6		8
-#define COL8_840000		9
-#define COL8_008400		10
-#define COL8_848400		11
-#define COL8_000084		12
-#define COL8_840084		13
-#define COL8_008484		14
-#define COL8_848484		15
-
 /* dsctbl.c */
 struct SEGMENT_DESCRIPTOR {
 	short limit_low, base_low;    // 2 2
@@ -208,6 +176,37 @@ void sheet_slide(struct SHEET *sht, int vx0, int vy0);
 void sheet_free(struct SHEET *sht) ;
 void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int h0);
 
+/* graphic.c */
+void init_palette(void);
+void set_palette(int start, int end, unsigned char *rgb);
+void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
+void init_screen8(unsigned char *vram, int xsize, int ysize);
+void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font);
+void putfonts8_asc(char *vram, int xsize, int x, int y, char color, unsigned char *s);
+void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor, char *s, int length);
+void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
+void init_mouse_cursor8(char *mouse, char bc) ;
+
+
+/* カラーパレットの定義 */
+#define COL8_000000		0
+#define COL8_FF0000		1
+#define COL8_00FF00		2
+#define COL8_FFFF00		3
+#define COL8_0000FF		4
+#define COL8_FF00FF		5
+#define COL8_00FFFF		6
+#define COL8_FFFFFF		7
+#define COL8_C6C6C6		8
+#define COL8_840000		9
+#define COL8_008400		10
+#define COL8_848400		11
+#define COL8_000084		12
+#define COL8_840084		13
+#define COL8_008484		14
+#define COL8_848484		15
+
+
 /* timer.c */
 void init_pit(void);
 void inthandler20(int *esp);
@@ -275,3 +274,17 @@ void task_add(struct TASK *task);
 void task_remove(struct TASK *task);
 void task_switchsub(void);
 void task_idle(void);
+
+/* file.c */
+void file_raedfat(int *fat, unsigned char *img);
+void file_loadfile(int clustno, int size, char *buf, int *fat, char *img);
+
+/* console.c */
+void console_task(struct SHEET *sheet, unsigned int memtotal);
+int cons_newline(int cursor_y, struct SHEET *sheet);
+
+/* window.c */
+void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);
+void make_wtitle8(unsigned char *buf, int xsize, char *title, char act);
+void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
+
