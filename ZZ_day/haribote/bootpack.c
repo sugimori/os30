@@ -463,7 +463,7 @@ void console_task(struct SHEET *sheet, unsigned int memtotal)
 							}
 						}
 						cursor_y = cons_newline(cursor_y, sheet);
-					} else if (cmdline[0] == 't' && cmdline[1] == 'y' && cmdline[2] == 'p' && cmdline[3] == 'e' && cmdline[4] == ' ') {
+					} else if(strncmp(cmdline, "type ", 5) == 0) {
 						// type コマンド
 						// ファイル名
 						for(y = 0; y < 11; y++) {
@@ -507,11 +507,30 @@ type_next_file:
 								// １文字ずつ表示
 								s[0] = p[x];
 								s[1] = 0;
-								putfonts8_asc_sht(sheet, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, s, 1);
-								cursor_x += 8;
-								if(cursor_x == 8 + 240) {	// 右端まで来たので改行
+								if(s[0] == 0x09) {	// タブ
+									for(;;) {
+										putfonts8_asc_sht(sheet, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
+										cursor_x += 8;
+										if(cursor_x == 8 + 240) {	// 画面の端まで行ったら改行
+											cursor_x = 8;
+											cursor_y = cons_newline(cursor_y, sheet);
+										}
+										if(((cursor_x - 8) & 0x1f) == 0) {
+											break;	// 32で割り切れたらbreak
+										}
+									}
+								} else if (s[0] == 0x0a) {	// 改行lf
 									cursor_x = 8;
 									cursor_y = cons_newline(cursor_y, sheet);
+								} else if (s[0] == 0x0d) {	// CR復帰
+									// 何もしない
+								} else {
+									putfonts8_asc_sht(sheet, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, s, 1);
+									cursor_x += 8;
+									if(cursor_x == 8 + 240) {	// 右端まで来たので改行
+										cursor_x = 8;
+										cursor_y = cons_newline(cursor_y, sheet);
+									}
 								}
 							}
 						} else {
