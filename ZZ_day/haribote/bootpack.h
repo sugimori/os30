@@ -33,6 +33,7 @@ struct BOOTINFO {
 int sprintf (char *str, char *fmt, ...);
 /* strcmp.c */
 int strcmp(char *s1, char *s2);
+int strncmp(char *s1, char *s2, int n);
 
 /* graphic.c */
 void init_palette(void);
