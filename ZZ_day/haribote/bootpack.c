@@ -5,6 +5,8 @@ void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
 void console_task(struct SHEET *sheet, unsigned int memtotal);
 int cons_newline(int cursor_y, struct SHEET *sheet);
+void file_raedfat(int *fat, unsigned char *img);
+void file_loadfile(int clustno, int size, char *buf, int *fat, char *img);
 extern struct TIMER *task_timer;
 #define KEYCMD_LED	0xed
 
@@ -369,6 +371,10 @@ void console_task(struct SHEET *sheet, unsigned int memtotal)
 	int x,y;
 	struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
 	struct FILEINFO *finfo = (struct FILEINFO *)(ADR_DISKIMG + 0x002600);
+	// FAT
+	int *fat = (int *) memman_alloc_4k(memman, 4 * 2880);
+
+	file_raedfat(fat, (unsigned char *) (ADR_DISKIMG + 0x000200));
 
 	fifo32_init(&task->fifo, 128, fifobuf, task);
 
@@ -500,12 +506,12 @@ type_next_file:
 						}
 						if(x<224 && finfo[x].name[0] != 0x00) {
 							// ファイルが見つかった場合
-							y = finfo[x].size;
-							p = (char *)(finfo[x].clustno * 512 + 0x003e00 + ADR_DISKIMG);
+							p = (char *) memman_alloc_4k(memman, finfo[x].size);
+							file_loadfile(finfo[x].clustno, finfo[x].size, p, fat, (char *) (ADR_DISKIMG + 0x003e00));
 							cursor_x = 8;
-							for(x=0;x<y;x++) {
+							for(y=0;y<finfo[x].size;y++) {
 								// １文字ずつ表示
-								s[0] = p[x];
+								s[0] = p[y];
 								s[1] = 0;
 								if(s[0] == 0x09) {	// タブ
 									for(;;) {
@@ -533,6 +539,7 @@ type_next_file:
 									}
 								}
 							}
+							memman_free_4k(memman, (int)p, finfo[x].size);
 						} else {
 							// ファイルがみつかなかった場合
 							putfonts8_asc_sht(sheet, 8, cursor_y, COL8_FFFFFF, COL8_000000, "File not found.", 15);
@@ -571,6 +578,39 @@ type_next_file:
 
 	}
 
+}
+
+void file_raedfat(int *fat, unsigned char *img)
+// ディスクイメージのFATの圧縮を解く
+{
+	int i, j = 0;
+	for(i = 0; i < 2880; i += 2) {
+		fat[i + 0] = (img[j + 0]		| img[j + 1] << 8) & 0xfff;
+		fat[i + 1] = (img[j + 1] >> 4	| img[j + 2] << 4) & 0xfff;
+		j += 3;
+	}
+	return;
+}
+
+void file_loadfile(int clustno, int size, char *buf, int *fat, char *img)
+{
+	int i;
+	for(;;) {
+		if(size <= 512) {
+			for(i=0;i<size;i++) {
+				buf[i] = img[clustno * 512 + i];
+			}
+			break;
+		}
+		// size > 512
+		for(i=0;i<512;i++) {
+			buf[i] = img[clustno * 512 + i];
+		}
+		size -= 512;
+		buf += 512;
+		clustno = fat[clustno];
+	}
+	return;
 }
 
 int cons_newline(int cursor_y, struct SHEET *sheet) 
