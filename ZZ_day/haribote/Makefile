@@ -47,6 +47,7 @@ haribote.img : ipl10.bin haribote.sys Makefile
 	mcopy -i haribote.img haribote.sys ::
 	mcopy -i haribote.img ipl10.nas ::
 	mcopy -i haribote.img Makefile ::
+	mcopy -i haribote.img test.txt ::
 # -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
 
 # コマンド
