@@ -29,6 +29,10 @@ default :
 naskfunc.o : naskfunc.nas Makefile
 	$(NASK) -g -f elf naskfunc.nas -o naskfunc.o -l naskfunc.lst
 
+hlt.hrb : hlt.nas Makefile
+	$(NASK) hlt.nas -o hlt.hrb -l $*.lst
+
+
 hankaku.c : hankaku.txt
 	./makefont.rb > hankaku.c
 
@@ -42,12 +46,13 @@ bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld
 haribote.sys : asmhead.bin bootpack.hrb Makefile
 	cat asmhead.bin bootpack.hrb > haribote.sys
 
-haribote.img : ipl10.bin haribote.sys Makefile
+haribote.img : ipl10.bin haribote.sys Makefile hlt.hrb
 	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
 	mcopy -i haribote.img haribote.sys ::
 	mcopy -i haribote.img ipl10.nas ::
 	mcopy -i haribote.img Makefile ::
 	mcopy -i haribote.img test.txt ::
+	mcopy -i haribote.img hlt.hrb  ::
 # -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
 
 # コマンド
