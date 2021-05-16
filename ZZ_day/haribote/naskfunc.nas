@@ -19,8 +19,8 @@
 		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c
 		GLOBAL	load_cr0, store_cr0
 		GLOBAL	load_tr, taskswitch4, taskswitch3, farjmp, farcall
-		GLOBAL	asm_cons_putchar
-		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, cons_putchar
+		GLOBAL	asm_cons_putchar, asm_hrb_api
+		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, cons_putchar, hrb_api
 
 
 ; à»â∫ÇÕé¿ç€ÇÃä÷êî
@@ -206,3 +206,11 @@ asm_cons_putchar:
 	POPAD
 	IRETD
 
+asm_hrb_api:
+	STI
+	PUSHAD	;ï€ë∂ÇÃÇΩÇﬂÇÃPUSH
+	PUSHAD
+	CALL	hrb_api
+	ADD		ESP,32
+	POPAD
+	IRETD
