@@ -28,6 +28,7 @@ void console_task(struct SHEET *sheet, unsigned int memtotal)
 	cons.cur_x = 8;
 	cons.cur_y = 28;
 	cons.cur_c = -1;
+	*((int *) 0x0fec) = (int) &cons;	// consの番地をAPIにわたす
 
 	fifo32_init(&task->fifo, 128, fifobuf, task);
 	timer = timer_alloc();
