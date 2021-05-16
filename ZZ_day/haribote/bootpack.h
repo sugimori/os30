@@ -276,12 +276,18 @@ void task_switchsub(void);
 void task_idle(void);
 
 /* file.c */
+struct FILEINFO {
+	unsigned char name[8], ext[3], type;
+	char reserve[10];
+	unsigned short time, date, clustno;
+	unsigned int size;
+};
 void file_raedfat(int *fat, unsigned char *img);
 void file_loadfile(int clustno, int size, char *buf, int *fat, char *img);
+struct FILEINFO *file_search(char *name, struct FILEINFO *finfo, int max);
 
 /* console.c */
 void console_task(struct SHEET *sheet, unsigned int memtotal);
-int cons_newline(int cursor_y, struct SHEET *sheet);
 
 /* window.c */
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);
