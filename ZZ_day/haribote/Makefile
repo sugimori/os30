@@ -40,7 +40,7 @@ hankaku.c : hankaku.txt
 	$(CC) -march=i486 -m32 -nostdlib -c $*.c -o $*.o
 	
 bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld 
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld $(OBJS_BOOTPACK) -o bootpack.hrb
+	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld $(OBJS_BOOTPACK) -o bootpack.hrb -Map bootpack.map
 #	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile
