@@ -18,7 +18,7 @@
 		GLOBAL	load_gdtr, load_idtr
 		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c
 		GLOBAL	load_cr0, store_cr0
-		GLOBAL	load_tr, taskswitch4, taskswitch3, farjmp
+		GLOBAL	load_tr, taskswitch4, taskswitch3, farjmp, farcall
 		GLOBAL	asm_cons_putchar
 		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, cons_putchar
 
@@ -190,11 +190,17 @@ farjmp:		; void farjmp(int eip, int cs);
 	JMP		FAR [ESP+4]		; eip, cs
 	RET
 
+farcall:	; void farcall(int eip, int cs);
+	CALL	FAR [ESP+4]		; eip, cs
+	RET
+
 asm_cons_putchar:	
+	STI
 	PUSH	1
 	AND		EAX,0xff	; AHやEAXの上位を0にして、EAXに文字コードが入った状態にする
 	PUSH	EAX
 	PUSH	DWORD [0x0fec]	;メモリを読み込んでその値をPUSHする
 	CALL	cons_putchar
 	ADD		ESP,12		; スタックに積んだデータを捨てる
-	RETF
+	IRETD
+
