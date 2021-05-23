@@ -48,7 +48,7 @@ bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld
 haribote.sys : asmhead.bin bootpack.hrb Makefile
 	cat asmhead.bin bootpack.hrb > haribote.sys
 
-haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb
+haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb
 	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
 	mcopy -i haribote.img haribote.sys ::
 	mcopy -i haribote.img ipl10.nas ::
@@ -56,6 +56,8 @@ haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb
 	mcopy -i haribote.img test.txt ::
 	mcopy -i haribote.img hello.hrb  ::
 	mcopy -i haribote.img hello2.hrb  ::
+	mcopy -i haribote.img a.hrb  ::
+	mcopy -i haribote.img hello3.hrb  ::
 # -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
 
 # コマンド
@@ -63,7 +65,7 @@ haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb
 img :
 	$(MAKE) haribote.img
 
-run :
+run : a.hrb
 	$(MAKE) img
 	$(COPY) haribote.img ../../z_tools/qemu/fdimage0.bin
 	$(MAKE) -C ../../z_tools/qemu
@@ -88,3 +90,12 @@ clean :
 src_only :
 	$(MAKE) clean
 	-$(DEL) haribote.img
+
+a_nasm.o : a_nasm.nas Makefile
+	$(NASK) -g -f elf32 a_nasm.nas -o a_nasm.o -l a_nasm.lst
+
+a.hrb:	a.o a_nasm.o Makefile har.ld 
+	$(LD) -m elf_i386 -nostdlib -Tapi.ls a.o a_nasm.o -o a.hrb -Map a.map
+
+hello3.hrb:	hello3.o a_nasm.o Makefile har.ld 
+	$(LD) -m elf_i386 -nostdlib -Tapi.ls hello3.o a_nasm.o -o hello3.hrb -Map hello3.map
