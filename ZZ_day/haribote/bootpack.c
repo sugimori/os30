@@ -101,7 +101,7 @@ void HariMain(void)
 	my = (binfo->scrny - 28 - 16) / 2;
 
 	sheet_slide(sht_back, 0,0); // 背景の位置を設定
-	sheet_slide(sht_cons, 32,  4);
+	sheet_slide(sht_cons, 32,  100);
 	sheet_slide(sht_win,  64,  56);
 	sheet_slide(sht_mouse, mx, my);
 	sheet_updown(sht_back, 0);	// 背景は０固定？
