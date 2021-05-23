@@ -37,6 +37,7 @@ int sprintf (char *str, char *fmt, ...);
 /* strcmp.c */
 int strcmp(char *s1, char *s2);
 int strncmp(char *s1, char *s2, int n);
+int strlen(char *s);
 
 /* dsctbl.c */
 struct SEGMENT_DESCRIPTOR {
