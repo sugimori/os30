@@ -4,4 +4,4 @@ BITS 32
     INT     0x40
     RETF
 msg:    
-    DB      "Hello",0
+    DB      "Hello2",0
