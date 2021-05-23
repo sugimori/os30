@@ -1,5 +1,7 @@
 #include "bootpack.h"
 
+void init_apple(char *buf, int xsize, char bc) ;
+
 void putfonts8_asc(char *vram, int xsize, int x, int y, char color, unsigned char *s)
 {
 	extern char hankaku[4096];
@@ -39,22 +41,28 @@ void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int color, int backcolor
 
 void init_screen8(unsigned char *vram, int xsize, int ysize)
 {
-	boxfill8(vram, xsize, COL8_008484,  0,         0,          xsize -  1, ysize - 29);
-	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
-	boxfill8(vram, xsize, COL8_FFFFFF,  0,         ysize - 27, xsize -  1, ysize - 27);
-	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 26, xsize -  1, ysize -  1);
+	boxfill8(vram, xsize, COL8_FFFFFF,  0,          0,          xsize -  1,         25);
+	boxfill8(vram, xsize, COL8_C6C6C6,  0,         26,          xsize -  1,         27);
+	boxfill8(vram, xsize, COL8_000000,  0,         28,          xsize -  1,         28);
+	boxfill8(vram, xsize, COL8_848484,  0,         29,          xsize -  1, ysize -  1);
 
-	boxfill8(vram, xsize, COL8_FFFFFF,  3,         ysize - 24, 59,         ysize - 24);
-	boxfill8(vram, xsize, COL8_FFFFFF,  2,         ysize - 24,  2,         ysize -  4);
-	boxfill8(vram, xsize, COL8_848484,  3,         ysize -  4, 59,         ysize -  4);
-	boxfill8(vram, xsize, COL8_848484, 59,         ysize - 23, 59,         ysize -  5);
-	boxfill8(vram, xsize, COL8_000000,  2,         ysize -  3, 59,         ysize -  3);
-	boxfill8(vram, xsize, COL8_000000, 60,         ysize - 24, 60,         ysize -  3);
+	init_apple(vram,xsize,COL8_FFFFFF);
 
-	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 24, xsize -  4, ysize - 24);
-	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize -  4);
-	boxfill8(vram, xsize, COL8_FFFFFF, xsize - 47, ysize -  3, xsize -  4, ysize -  3);
-	boxfill8(vram, xsize, COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
+	// boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
+	// boxfill8(vram, xsize, COL8_FFFFFF,  0,         ysize - 27, xsize -  1, ysize - 27);
+	// boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 26, xsize -  1, ysize -  1);
+
+	// boxfill8(vram, xsize, COL8_FFFFFF,  3,         ysize - 24, 59,         ysize - 24);
+	// boxfill8(vram, xsize, COL8_FFFFFF,  2,         ysize - 24,  2,         ysize -  4);
+	// boxfill8(vram, xsize, COL8_848484,  3,         ysize -  4, 59,         ysize -  4);
+	// boxfill8(vram, xsize, COL8_848484, 59,         ysize - 23, 59,         ysize -  5);
+	// boxfill8(vram, xsize, COL8_000000,  2,         ysize -  3, 59,         ysize -  3);
+	// boxfill8(vram, xsize, COL8_000000, 60,         ysize - 24, 60,         ysize -  3);
+
+	// boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 24, xsize -  4, ysize - 24);
+	// boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize -  4);
+	// boxfill8(vram, xsize, COL8_FFFFFF, xsize - 47, ysize -  3, xsize -  4, ysize -  3);
+	// boxfill8(vram, xsize, COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
 }
 
 void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1)
@@ -68,6 +76,45 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 	return ;
 }
 
+void init_apple(char *buf, int xsize, char bc) 
+{
+	static char apple[22][18] = {
+		"OOOOOOOOOO@@@@OOOO",
+		"OOOOOOOOOO@@@@OOOO",
+		"OOOOOOOO@@@@OOOOOO",
+		"OOOOOOOO@@@@OOOOOO",
+		"OOOOOOOO@@OOOOOOOO",
+		"OOOOOOOO@@OOOOOOOO",
+		"OO@@@@@@OO@@@@@@OO",
+		"OO@@@@@@OO@@@@@@OO",
+		"@@@@@@@@@@@@@@@@@@",
+		"@@@@@@@@@@@@@@@@@@",
+		"@@@@@@@@@@@@@@OOOO",
+		"@@@@@@@@@@@@@@OOOO",
+		"@@@@@@@@@@@@@@OOOO",
+		"@@@@@@@@@@@@@@@@@@",
+		"@@@@@@@@@@@@@@@@@@",
+		"@@@@@@@@@@@@@@@@@@",
+		"@@@@@@@@@@@@@@@@@@",
+		"OO@@@@@@@@@@@@@@OO",
+		"OO@@@@@@@@@@@@@@OO",
+		"OOOO@@@@OO@@@@OOOO",
+		"OOOO@@@@OO@@@@OOOO",
+	};
+	int x, y, c;
+
+	for(y=0;y<22;y++) {
+		for(x=0;x<18;x++) {
+			c = apple[y][x];
+			if(c == '@') c = COL8_000000;
+			else if ( c == '$') c = COL8_848484;
+			else if ( c == 'Q') c = COL8_C6C6C6;
+			else c = bc;
+			buf[(2+y) * xsize + (5 + x)] = c;
+		}
+	}
+	return;
+}
 
 void init_palette(void)
 {

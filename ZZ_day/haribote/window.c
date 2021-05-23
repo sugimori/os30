@@ -2,15 +2,23 @@
 
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act)
 {
-	boxfill8(buf, xsize, COL8_C6C6C6,	0,			0,			xsize - 1,	0	);
-	boxfill8(buf, xsize, COL8_FFFFFF,	1,			1,			xsize - 2,	1	);
-	boxfill8(buf, xsize, COL8_C6C6C6,	0,			0,			0,			ysize -1);
-	boxfill8(buf, xsize, COL8_FFFFFF,	1,			1,			1,			ysize -2);
-	boxfill8(buf, xsize, COL8_848484,	xsize -2,	1,			xsize -2, 	ysize -2);
-	boxfill8(buf, xsize, COL8_000000,	xsize -1,	0,			xsize -1,	ysize -1);
-	boxfill8(buf, xsize, COL8_C6C6C6,	2,			2,			xsize -3,	ysize -3);
-	boxfill8(buf, xsize, COL8_848484,	1,			ysize -2,	xsize -2,	ysize -2);
-	boxfill8(buf, xsize, COL8_000000,	0,			ysize -1,	xsize -1,	ysize -1);
+	// 上辺
+	boxfill8(buf, xsize, COL8_000000,	0,			0,			xsize - 1,	1	);
+	// boxfill8(buf, xsize, COL8_000000,	1,			1,			xsize - 2,	1	);
+	// 左辺
+	boxfill8(buf, xsize, COL8_000000,	0,			0,			1,			ysize -1);
+	// boxfill8(buf, xsize, COL8_FFFFFF,	1,			1,			1,			ysize -2);
+
+	// 右辺
+	boxfill8(buf, xsize, COL8_000000,	xsize -2,	0,			xsize -1, 	ysize -1);
+	// boxfill8(buf, xsize, COL8_FFFFFF,	xsize -1,	0,			xsize -1,	ysize -1);
+
+	// 内側
+	boxfill8(buf, xsize, COL8_FFFFFF,	2,			2,			xsize -3,	ysize -3);
+
+	// 下辺
+	boxfill8(buf, xsize, COL8_000000,	0,			ysize -2,	xsize -1,	ysize -1);
+	// boxfill8(buf, xsize, COL8_FFFFFF,	0,			ysize -1,	xsize -1,	ysize -1);
 	make_wtitle8(buf, xsize, title, act);
 	return ;
 }
@@ -35,27 +43,21 @@ void make_wtitle8(unsigned char *buf, int xsize, char *title, char act)
 		"@@@@@@@@@@@@@@@@"
 	};
 
-	int x, y;
+	int x, y,i;
 	char c, tc, tbc;
 	if(act != 0) {
-		tc = COL8_FFFFFF;
-		tbc = COL8_000084;
-	} else {
-		tc = COL8_C6C6C6;
-		tbc = COL8_848484;
-	}
-	boxfill8(buf, xsize, tbc, 3, 3, xsize -4, 20);
-	putfonts8_asc(buf, xsize, 24,4, tc, title);
-	for(y=0;y<14;y++) {
-		for(x=0;x<16;x++) {
-			c = closebtn[y][x];
-			if(c == '@') c = COL8_000000;
-			else if ( c == '$') c = COL8_848484;
-			else if ( c == 'Q') c = COL8_C6C6C6;
-			else c = COL8_FFFFFF;
-			buf[(5+y) * xsize + (xsize - 21 + x)] = c;
+		for(i=0;i<6;i++) {
+			boxfill8(buf, xsize, COL8_000000, 3, 5 + 3*i , xsize -4, 5 + 3 * i);
 		}
+		boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 - 2, 5 + 0 - 2, 3 + 10 + 15 + 2, 5 + 15 + 2);
+		boxfill8(buf, xsize, COL8_000000, 3 + 10    , 5 + 0    , 3 + 10 + 15    , 5 + 15);
+		boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 + 2, 5 + 0 + 2, 3 + 10 + 15 - 2, 5 + 15 - 2);
+	} else {
+		boxfill8(buf,xsize,COL8_FFFFFF, 3, 5, xsize - 4, 5 + 15);
 	}
+	x = xsize/2 - strlen(title) * 8 / 2;
+	boxfill8(buf,xsize, COL8_FFFFFF, x - 5,4, x + strlen(title) * 8 + 5,20);
+	putfonts8_asc(buf, xsize, x,4, COL8_000000, title);
 	return ;
 }
 
