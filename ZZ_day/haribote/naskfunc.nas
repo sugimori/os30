@@ -16,11 +16,11 @@
 		GLOBAL	io_out8,io_out16,io_out32
 		GLOBAL	io_load_eflags,io_store_eflags
 		GLOBAL	load_gdtr, load_idtr
-		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c
+		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c, asm_inthandler0d
 		GLOBAL	load_cr0, store_cr0
 		GLOBAL	load_tr, taskswitch4, taskswitch3, farjmp, farcall
 		GLOBAL	asm_cons_putchar, asm_hrb_api, start_app
-		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, cons_putchar, hrb_api
+		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, inthandler0d, cons_putchar, hrb_api
 
 
 ; 以下は実際の関数
@@ -265,6 +265,67 @@ asm_inthandler2c:
 		POP		DS
 		POP		ES
 		IRETD
+
+asm_inthandler0d:
+		STI
+		PUSH	ES
+		PUSH	DS
+		PUSHAD
+		MOV		AX,SS
+		CMP		AX,1*8
+		JNE		.from_app
+;	OSが動いているときに割り込まれたのでほぼ今までどおり
+		MOV		EAX,ESP
+		PUSH	SS				; 割り込まれたときのSSを保存
+		PUSH	EAX				; 割り込まれたときのESPを保存
+		MOV		AX,SS
+		MOV		DS,AX
+		MOV		ES,AX
+		CALL	inthandler0d
+		ADD		ESP,8
+		POPAD
+		POP		DS
+		POP		ES
+		ADD		ESP,4			; INT 0x0d ではこれが必要
+		IRETD
+.from_app:
+;	アプリが動いているときに割り込まれた
+		CLI
+		MOV		EAX,1*8
+		MOV		DS,AX			; とりあえずDSだけOS用にする
+		MOV		ECX,[0xfe4]		; OSのESP
+		ADD		ECX,-8
+		MOV		[ECX+4],SS		; 割り込まれたときのSSを保存
+		MOV		[ECX  ],ESP		; 割り込まれたときのESPを保存
+		MOV		SS,AX
+		MOV		ES,AX
+		MOV		ESP,ECX
+		STI
+		CALL	inthandler0d
+		CLI
+		CMP		EAX,0
+		JNE		.kill
+		POP		ECX
+		POP		EAX
+		MOV		SS,AX			; SSをアプリ用に戻す
+		MOV		ESP,ECX			; ESPもアプリ用に戻す
+		POPAD
+		POP		DS
+		POP		ES
+		ADD		ESP,4			; INT 0x0d では これが必要
+		IRETD
+.kill	
+		MOV		EAX,1*8
+		MOV		ES,AX
+		MOV		SS,AX
+		MOV		DS,AX
+		MOV		FS,AX
+		MOV		GS,AX
+		MOV		ESP,[0xfe4]
+		STI
+		POPAD
+		RET
+
 load_cr0:		; int load_cr0(void);
 	MOV		EAX,CR0
 	RET

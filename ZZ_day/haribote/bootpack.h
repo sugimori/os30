@@ -13,6 +13,7 @@ void asm_inthandler20(void);
 void asm_inthandler21(void);
 void asm_inthandler27(void);
 void asm_inthandler2c(void);
+void asm_inthandler0d(void);
 void asm_cons_putchar(void);
 void asm_hrb_api(void);
 int load_cr0(void);
