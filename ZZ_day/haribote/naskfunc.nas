@@ -16,11 +16,11 @@
 		GLOBAL	io_out8,io_out16,io_out32
 		GLOBAL	io_load_eflags,io_store_eflags
 		GLOBAL	load_gdtr, load_idtr
-		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c, asm_inthandler0d
+		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c, asm_inthandler0d, asm_inthandler0c
 		GLOBAL	load_cr0, store_cr0
 		GLOBAL	load_tr, taskswitch4, taskswitch3, farjmp, farcall
 		GLOBAL	asm_cons_putchar, asm_hrb_api, start_app
-		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, inthandler0d, cons_putchar, hrb_api
+		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, inthandler0d, inthandler0c, cons_putchar, hrb_api
 
 
 ; 以下は実際の関数
@@ -184,6 +184,25 @@ asm_inthandler0d:
 		ADD		ESP,4			; INT 0x0d ではこれが必要
 		IRETD
 
+asm_inthandler0c:
+		STI
+		PUSH	ES
+		PUSH	DS
+		PUSHAD
+		MOV		EAX,ESP
+		PUSH	EAX
+		MOV		AX,SS
+		MOV		DS,AX
+		MOV		ES,AX
+		CALL	inthandler0c
+		CMP		EAX,0
+		JNE		end_app
+		POP		EAX
+		POPAD
+		POP		DS
+		POP		ES
+		ADD		ESP,4
+		IRETD
 load_cr0:		; int load_cr0(void);
 	MOV		EAX,CR0
 	RET
