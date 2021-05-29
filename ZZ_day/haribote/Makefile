@@ -29,11 +29,8 @@ default :
 naskfunc.o : naskfunc.nas Makefile
 	$(NASK) -g -f elf naskfunc.nas -o naskfunc.o -l naskfunc.lst
 
-hello.hrb : hello.nas Makefile
-	$(NASK) hello.nas -o hello.hrb -l $*.lst
-
-hello2.hrb : hello2.nas Makefile
-	$(NASK) hello2.nas -o hello2.hrb -l $*.lst
+%.hrb : %.nas Makefile
+	$(NASK) $*.nas -o $*.hrb -l $*.lst
 
 hankaku.c : hankaku.txt
 	./makefont.rb > hankaku.c
@@ -48,7 +45,7 @@ bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld
 haribote.sys : asmhead.bin bootpack.hrb Makefile
 	cat asmhead.bin bootpack.hrb > haribote.sys
 
-haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb crack1.hrb
+haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb crack1.hrb crack2.hrb
 	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
 	mcopy -i haribote.img haribote.sys ::
 	mcopy -i haribote.img ipl10.nas ::
@@ -59,6 +56,7 @@ haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3
 	mcopy -i haribote.img a.hrb  ::
 	mcopy -i haribote.img hello3.hrb  ::
 	mcopy -i haribote.img crack1.hrb  ::
+	mcopy -i haribote.img crack2.hrb  ::
 # -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
 
 # コマンド
