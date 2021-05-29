@@ -22,6 +22,7 @@ void taskswitch4(void);
 void taskswitch3(void);
 void farjmp(int eip, int cs);
 void farcall(int eip, int cs);
+void start_app(int eip, int cs, int esp, int ds);
 
 /* asmhead.nas */
 struct BOOTINFO {
