@@ -1,4 +1,6 @@
 BITS 32
+        GLOBAL      HariMain
+HariMain:
     MOV     ECX,msg
     MOV     EDX,1
 putloop:

@@ -1,4 +1,7 @@
 BITS 32
+        GLOBAL      HariMain
+
+HariMain:
     MOV     EDX,2
     MOV     EBX,msg
     INT     0x40
