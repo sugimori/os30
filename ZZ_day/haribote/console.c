@@ -1,10 +1,5 @@
 #include "bootpack.h"
 
-struct CONSOLE {
-	struct SHEET *sht;
-	int cur_x, cur_y, cur_c;
-};
-
 void cons_putchar(struct CONSOLE *cons, int chr, char move);
 void cons_newline(struct CONSOLE *cons);
 void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int memtotal);
@@ -312,14 +307,10 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 		set_segmdesc(gdt + 1003, finfo->size -1, (int) p, AR_CODE32_ER + 0x60);
 		set_segmdesc(gdt + 1004, 64 * 1024 -1,   (int) q, AR_DATA32_RW + 0x60);
 		if(finfo->size >= 8 && strncmp(p + 4, "Hari", 4) == 0) {
-			p[0] = 0xe8;
-			p[1] = 0x16;
-			p[2] = 0x00;
-			p[3] = 0x00;
-			p[4] = 0x00;			
-			p[5] = 0xcb;
+			start_app(0x1b, 1003 * 8, 64 * 1024, 1004 * 8, &(task->tss.esp0 ));
+		} else {
+			start_app(0, 1003 * 8, 64 * 1024, 1004 * 8, &(task->tss.esp0 ));
 		}
-		start_app(0, 1003 * 8, 64 * 1024, 1004 * 8, &(task->tss.esp0 ));
 		memman_free_4k(memman, (int) p, finfo->size);
 		memman_free_4k(memman, (int) q, 64 * 1024);
 		cons_newline(cons);
@@ -333,10 +324,13 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	int cs_base = *((int *)0xfe8);
 	struct TASK *task = task_now();
 	struct CONSOLE *cons = (struct CONSOLE *) *((int *) 0x0fec);
+	char s[12];
 	if(edx == 1) {
 		cons_putchar(cons, eax & 0xff, 1);
 	} else if(edx == 2) {
-		cons_putstr0(cons, (char *) ebx + cs_base);
+		// cons_putstr0(cons, (char *) ebx + cs_base);
+		sprintf(s, "%08X\n", ebx);
+		cons_putstr0(cons, s);
 	} else if (edx == 3) {
 		cons_putstr1(cons, (char *) ebx + cs_base, ecx);
 	} else if (edx == 4) {

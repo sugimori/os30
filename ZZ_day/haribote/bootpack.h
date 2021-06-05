@@ -17,6 +17,7 @@ void asm_inthandler0d(void);
 void asm_inthandler0c(void);
 void asm_cons_putchar(void);
 void asm_hrb_api(void);
+void asm_end_app(void);
 int load_cr0(void);
 void store_cr0(int cr0);
 void load_tr(int tr);
@@ -294,7 +295,12 @@ void file_loadfile(int clustno, int size, char *buf, int *fat, char *img);
 struct FILEINFO *file_search(char *name, struct FILEINFO *finfo, int max);
 
 /* console.c */
+struct CONSOLE {
+	struct SHEET *sht;
+	int cur_x, cur_y, cur_c;
+};
 void console_task(struct SHEET *sheet, unsigned int memtotal);
+void cons_putstr0(struct CONSOLE *cons, char *s);
 
 /* window.c */
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);

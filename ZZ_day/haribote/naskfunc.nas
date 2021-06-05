@@ -19,7 +19,7 @@
 		GLOBAL	asm_inthandler20, asm_inthandler21, asm_inthandler27, asm_inthandler2c, asm_inthandler0d, asm_inthandler0c
 		GLOBAL	load_cr0, store_cr0
 		GLOBAL	load_tr, taskswitch4, taskswitch3, farjmp, farcall
-		GLOBAL	asm_cons_putchar, asm_hrb_api, start_app
+		GLOBAL	asm_cons_putchar, asm_hrb_api, start_app, asm_end_app
 		EXTERN	inthandler20, inthandler21, inthandler2c, inthandler27, inthandler0d, inthandler0c, cons_putchar, hrb_api
 
 
@@ -176,7 +176,7 @@ asm_inthandler0d:
 		MOV		ES,AX
 		CALL	inthandler0d
 		CMP		EAX,0
-		JNE		end_app
+		JNE		asm_end_app
 		POP		EAX
 		POPAD
 		POP		DS
@@ -196,7 +196,7 @@ asm_inthandler0c:
 		MOV		ES,AX
 		CALL	inthandler0c
 		CMP		EAX,0
-		JNE		end_app
+		JNE		asm_end_app
 		POP		EAX
 		POPAD
 		POP		DS
@@ -256,15 +256,16 @@ asm_hrb_api:
 
 	CALL	hrb_api
 	CMP		EAX,0		; EAが 0でなければアプリ終了処理
-	JNE		end_app
+	JNE		asm_end_app
 	ADD		ESP,32
 	POPAD
 	POP		ES
 	POP		DS
 	IRETD
-end_app:
+asm_end_app:
 ;	EAXはtss.esp0の番地
 	MOV		ESP,[EAX]
+	MOV		DWORD [EAX+4],0
 	POPAD
 	RET					; cmd_appへ 戻る
 

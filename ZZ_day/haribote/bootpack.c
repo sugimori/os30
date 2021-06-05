@@ -26,6 +26,8 @@ void HariMain(void)
 	int cursor_x, cursor_c;
 	//マルチタスク
 	struct TASK *task_a, *task_cons;
+	// コンソール
+	struct CONSOLE *cons;
 	
 
 	init_gdtidt();
@@ -249,7 +251,15 @@ void HariMain(void)
 					wait_KBC_sendready();
 					io_out8(PORT_KEYDAT, keycmd_wait);
 				}
+				if(i - 256 == 0x3b && key_shift != 0 && task_cons->tss.ss0 != 0) { // Shift+F1
+					cons = (struct CONSOLE *) *((int *) 0x0fec);
+					cons_putstr0(cons, "\nBreak(key) :\n");
+					io_cli(); // 割り込み中止
+					task_cons->tss.eax = (int) &(task_cons->tss.esp0);
+					task_cons->tss.eip = (int) asm_end_app;
+					io_sti();
 
+				}
 
 				// カーソルの再表示
 				if(cursor_c > 0) {
