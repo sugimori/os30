@@ -334,6 +334,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	struct CONSOLE *cons = (struct CONSOLE *) *((int *) 0x0fec);
 	struct SHTCTL *shtctl = (struct SHTCTL *) *((int *) 0x0fe4);
 	struct SHEET *sht;
+	char s[20];
 	int *reg = &eax + 1; // eaxの次の番地
 		// 保存のためにPUSHADを強引に書き換える
 		// reg[0]: EDI, reg[1]: ESI, reg[2]: EBP, reg[3]: ESP 
@@ -355,6 +356,18 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 		sheet_slide(sht, 100, 50);
 		sheet_updown(sht, 3); // task_aの上
 		reg[7] = (int) sht;  // EAXを書き換えて戻り値にする
+	} else if (edx == 6) {
+		// EDX=6, EBX=window number, ESI=xpos, EDI=ypos, EAX=color number, ECX=string length EBP=string
+		sht = (struct SHEET *) ebx;
+		putfonts8_asc(sht->buf, sht->bxsize, esi, edi, eax, (char *) ebp + ds_base);
+		sheet_refresh(sht, esi, edi, esi + ecx * 8, edi + 16);
+	} else if (edx == 7) {
+		// EDX=7, EBX=window number, EAX=x0, ECX=y0, ESI=x1, EDI=y1, EBP=color number
+		sht = (struct SHEET *) ebx;
+		boxfill8(sht->buf, sht->bxsize, ebp, eax, ecx, esi, edi);
+		// sprintf(s, "eax:%d,ecx:%d", eax, ecx);
+		// putfonts8_asc(sht->buf, sht->bxsize, 28,28,0,s);
+		sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
 	}
 	return 0;
 }
