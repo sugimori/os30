@@ -114,7 +114,7 @@ void sheet_updown(struct SHEET *sht, int height)
         //      height
         //      0
         //      old
-            for(h=ctl->top;h>height; h--) {
+            for(h=ctl->top;h >= height; h--) {
                 ctl->sheets[h+1] = ctl->sheets[h];
                 ctl->sheets[h+1]->height = h+1;
             }
