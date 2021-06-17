@@ -313,7 +313,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline) {
       for (i = 0; i < datsiz; i++) {
         q[esp + i] = p[dathrb + i];
       }
-      start_app(0x1b, 1003 * 8, 64 * 1024, 1004 * 8, &(task->tss.esp0));
+      start_app(0x1b, 1003 * 8, esp, 1004 * 8, &(task->tss.esp0));
       memman_free_4k(memman, (int)q, seqsiz);
     } else {
       cons_putstr0(cons, ".hrb file format error.\n");
@@ -379,6 +379,10 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx,
   } else if (edx == 10) {
     ecx = (ecx + 0x0f) & 0xffffff0;
     memman_free((struct MEMMAN *)(ebx + ds_base), eax, ecx);
+  } else if (edx == 11) {
+    sht = (struct SHEET *)ebx;
+    sht->buf[sht->bxsize * edi + esi] = eax;
+    sheet_refresh(sht, esi, edi, esi + 1, edi + 1);
   }
   return 0;
 }
