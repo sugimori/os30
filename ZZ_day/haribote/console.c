@@ -347,6 +347,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx,
   } else if (edx == 4) {
     return &(task->tss.esp0);
   } else if (edx == 5) {
+    // int api_openwin(char *buf, int xsiz, int ysiz, int col_inv, char *title);
     // EDX=5, EBX=window buffer, ESI=xsize, EDI=ysize, EAX=透明色, ECX=window
     // name
     sht = sheet_alloc(shtctl);
@@ -356,12 +357,14 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx,
     sheet_updown(sht, 3);  // task_aの上
     reg[7] = (int)sht;     // EAXを書き換えて戻り値にする
   } else if (edx == 6) {
+    // void api_putstrwin(int win, int x, int y, int col, int len, char *str);
     // EDX=6, EBX=window number, ESI=xpos, EDI=ypos, EAX=color number,
     // ECX=string length EBP=string
     sht = (struct SHEET *)ebx;
     putfonts8_asc(sht->buf, sht->bxsize, esi, edi, eax, (char *)ebp + ds_base);
     sheet_refresh(sht, esi, edi, esi + ecx * 8, edi + 16);
   } else if (edx == 7) {
+    // void api_boxfilwin(int win, int x0, int y0, int x1, int y1, int col);
     // EDX=7, EBX=window number, EAX=x0, ECX=y0, ESI=x1, EDI=y1, EBP=color
     // number
     sht = (struct SHEET *)ebx;
@@ -370,16 +373,20 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx,
     // putfonts8_asc(sht->buf, sht->bxsize, 28,28,0,s);
     sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
   } else if (edx == 8) {
+    // void api_initmalloc(void);
     memman_init((struct MEMMAN *)(ebx + ds_base));
     ecx &= 0xfffffff0;
     memman_free((struct MEMMAN *)(ebx + ds_base), eax, ecx);
   } else if (edx == 9) {
+    // char * api_malloc(int size);
     ecx = (ecx + 0x0f) & 0xfffffff0;
     reg[7] = memman_alloc((struct MEMMAN *)(ebx + ds_base), ecx);
   } else if (edx == 10) {
+    // void api_free(char *addr, int size);
     ecx = (ecx + 0x0f) & 0xffffff0;
     memman_free((struct MEMMAN *)(ebx + ds_base), eax, ecx);
   } else if (edx == 11) {
+    //  void api_point(int win, int x, int y, int col);
     sht = (struct SHEET *)ebx;
     sht->buf[sht->bxsize * edi + esi] = eax;
     sheet_refresh(sht, esi, edi, esi + 1, edi + 1);
