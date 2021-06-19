@@ -12,6 +12,7 @@ BITS 32
     GLOBAL  api_point
     GLOBAL  api_refreshwin
     GLOBAL  api_linewin
+    GLOBAL  api_closewin
 
 [SECTION .text]	
 
@@ -166,4 +167,12 @@ api_linewin:       ; void api_linewin(int win, int x0, int y0, int x1, int y1, i
     POP     EBP
     POP     ESI
     POP     EDI
+    RET
+
+api_closewin:       ; void api_closewin(int win);
+    PUSH    EBX
+    MOV     EDX,14
+    MOV     EBX,[ESP+8]     ; win
+    INT     0x40
+    POP     EBX
     RET
