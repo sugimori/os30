@@ -27,6 +27,9 @@ void HariMain(void) {
   struct TASK *task_a, *task_cons;
   // コンソール
   struct CONSOLE *cons;
+  // ウインドウ
+  int j, x, y;
+  struct SHEET *sht;
 
   init_gdtidt();
   init_pic();
@@ -302,8 +305,19 @@ void HariMain(void) {
           // putfonts8_asc_sht(sht_back,0,0,COL8_FFFFFF,COL8_008484,s,12);
           sheet_slide(sht_mouse, mx, my);
           if ((mdec.btn & 0x01) != 0) {
-            // 左ボタンを教えていたら動かす
-            sheet_slide(sht_win, mx - 80, my - 8);
+            // 左ボタンを押している
+            // 上の下敷きから順番にマウスが指している下敷きを探す
+            for (j = shtctl->top - 1; j > 0; j--) {
+              sht = shtctl->sheets[j];
+              x = mx - sht->vx0;
+              y = my - sht->vy0;
+              if (0 <= x && x < sht->bxsize && 0 <= y && y < sht->bysize) {
+                if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
+                  sheet_updown(sht, shtctl->top - 1);
+                  break;
+                }
+              }
+            }
           }
         }
 
