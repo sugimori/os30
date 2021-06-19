@@ -28,7 +28,7 @@ void HariMain(void) {
   // コンソール
   struct CONSOLE *cons;
   // ウインドウ
-  int j, x, y;
+  int j, x, y, mmx = -1, mmy = -1;
   struct SHEET *sht;
 
   init_gdtidt();
@@ -306,18 +306,36 @@ void HariMain(void) {
           sheet_slide(sht_mouse, mx, my);
           if ((mdec.btn & 0x01) != 0) {
             // 左ボタンを押している
-            // 上の下敷きから順番にマウスが指している下敷きを探す
-            for (j = shtctl->top - 1; j > 0; j--) {
-              sht = shtctl->sheets[j];
-              x = mx - sht->vx0;
-              y = my - sht->vy0;
-              if (0 <= x && x < sht->bxsize && 0 <= y && y < sht->bysize) {
-                if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
-                  sheet_updown(sht, shtctl->top - 1);
-                  break;
+            if (mmx < 0) {
+              // 通常モード
+              // 上の下敷きから順番にマウスが指している下敷きを探す
+              for (j = shtctl->top - 1; j > 0; j--) {
+                sht = shtctl->sheets[j];
+                x = mx - sht->vx0;
+                y = my - sht->vy0;
+                if (0 <= x && x < sht->bxsize && 0 <= y && y < sht->bysize) {
+                  if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
+                    sheet_updown(sht, shtctl->top - 1);
+                    if (3 <= x && x < sht->bxsize - 3 && 3 <= y &&
+                        y < 21) {  // タイトル部分
+                      mmx = mx;    // ウインドウ移動モード
+                      mmy = my;
+                    }
+                    break;
+                  }
                 }
               }
+            } else {
+              // ウインドウ移動モード
+              x = mx - mmx;
+              y = my - mmy;
+              sheet_slide(sht, sht->vx0 + x, sht->vy0 + y);
+              mmx = mx;
+              mmy = my;
             }
+          } else {
+            // 左ボタンを押していない
+            mmx = -1;
           }
         }
 
