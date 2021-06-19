@@ -45,7 +45,7 @@ bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld
 haribote.sys : asmhead.bin bootpack.hrb Makefile
 	cat asmhead.bin bootpack.hrb > haribote.sys
 
-haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb crack1.hrb crack2.hrb crack3.hrb crack4.hrb crack5.hrb crack6.hrb bug1.hrb bug2.hrb bug3.hrb hello4.hrb hello5.hrb winhelo.hrb winhelo2.hrb winhelo3.hrb star1.hrb stars.hrb
+haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb crack1.hrb crack2.hrb crack3.hrb crack4.hrb crack5.hrb crack6.hrb bug1.hrb bug2.hrb bug3.hrb hello4.hrb hello5.hrb winhelo.hrb winhelo2.hrb winhelo3.hrb star1.hrb stars.hrb stars2.hrb
 	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
 	mcopy -i haribote.img haribote.sys ::
 	mcopy -i haribote.img ipl10.nas ::
@@ -71,6 +71,7 @@ haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3
 	mcopy -i haribote.img winhelo3.hrb  ::
 	mcopy -i haribote.img star1.hrb  ::
 	mcopy -i haribote.img stars.hrb  ::
+	mcopy -i haribote.img stars2.hrb  ::
 
 
 # -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
