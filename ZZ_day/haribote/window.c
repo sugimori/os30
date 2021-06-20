@@ -1,7 +1,6 @@
 #include "bootpack.h"
 
-void make_window8(unsigned char *buf, int xsize, int ysize, char *title,
-                  char act) {
+void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act) {
   // 上辺
   boxfill8(buf, xsize, COL8_000000, 0, 0, xsize - 1, 1);
   // boxfill8(buf, xsize, COL8_000000,	1,			1,
@@ -30,12 +29,10 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title,
 }
 
 void make_wtitle8(unsigned char *buf, int xsize, char *title, char act) {
-  static char closebtn[14][16] = {
-      "OOOOOOOOOOOOOOO@", "OQQQQQQQQQQQQQ$@", "OQQQQQQQQQQQQQ$@",
-      "OQQQ@@QQQQ@@QQ$@", "OQQQQ@@QQ@@QQQ$@", "OQQQQQ@@@@QQQQ$@",
-      "OQQQQQQ@@QQQQQ$@", "OQQQQQ@@@@QQQQ$@", "OQQQQ@@QQ@@QQQ$@",
-      "OQQQ@@QQQQ@@QQ$@", "OQQQQQQQQQQQQQ$@", "OQQQQQQQQQQQQQ$@",
-      "O$$$$$$$$$$$$$$@", "@@@@@@@@@@@@@@@@"};
+  static char closebtn[14][16] = {"OOOOOOOOOOOOOOO@", "OQQQQQQQQQQQQQ$@", "OQQQQQQQQQQQQQ$@", "OQQQ@@QQQQ@@QQ$@",
+                                  "OQQQQ@@QQ@@QQQ$@", "OQQQQQ@@@@QQQQ$@", "OQQQQQQ@@QQQQQ$@", "OQQQQQ@@@@QQQQ$@",
+                                  "OQQQQ@@QQ@@QQQ$@", "OQQQ@@QQQQ@@QQ$@", "OQQQQQQQQQQQQQ$@", "OQQQQQQQQQQQQQ$@",
+                                  "O$$$$$$$$$$$$$$@", "@@@@@@@@@@@@@@@@"};
 
   int x, y, i;
   char c, tc, tbc;
@@ -43,22 +40,40 @@ void make_wtitle8(unsigned char *buf, int xsize, char *title, char act) {
     for (i = 0; i < 6; i++) {
       boxfill8(buf, xsize, COL8_000000, 3, 5 + 3 * i, xsize - 4, 5 + 3 * i);
     }
-    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 - 2, 5 + 0 - 2, 3 + 10 + 15 + 2,
-             5 + 15 + 2);
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 - 2, 5 + 0 - 2, 3 + 10 + 15 + 2, 5 + 15 + 2);
     boxfill8(buf, xsize, COL8_000000, 3 + 10, 5 + 0, 3 + 10 + 15, 5 + 15);
-    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 + 2, 5 + 0 + 2, 3 + 10 + 15 - 2,
-             5 + 15 - 2);
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 + 2, 5 + 0 + 2, 3 + 10 + 15 - 2, 5 + 15 - 2);
   } else {
     boxfill8(buf, xsize, COL8_FFFFFF, 3, 5, xsize - 4, 5 + 15);
-    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 - 2, 5 + 0 - 2, 3 + 10 + 15 + 2,
-             5 + 15 + 2);
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 - 2, 5 + 0 - 2, 3 + 10 + 15 + 2, 5 + 15 + 2);
     boxfill8(buf, xsize, COL8_C6C6C6, 3 + 10, 5 + 0, 3 + 10 + 15, 5 + 15);
-    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 + 2, 5 + 0 + 2, 3 + 10 + 15 - 2,
-             5 + 15 - 2);
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 + 2, 5 + 0 + 2, 3 + 10 + 15 - 2, 5 + 15 - 2);
   }
   x = xsize / 2 - strlen(title) * 8 / 2;
   boxfill8(buf, xsize, COL8_FFFFFF, x - 5, 4, x + strlen(title) * 8 + 5, 20);
   putfonts8_asc(buf, xsize, x, 4, COL8_000000, title);
+  return;
+}
+
+void change_wtitle8(struct SHEET *sht, char act) {
+  int i, x, y, xsize = sht->bxsize;
+  char *buf = sht->buf;
+  if (act != 0) {
+    for (i = 0; i < 6; i++) {
+      boxfill8(buf, xsize, COL8_000000, 3, 5 + 3 * i, xsize - 4, 5 + 3 * i);
+    }
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 - 2, 5 + 0 - 2, 3 + 10 + 15 + 2, 5 + 15 + 2);
+    boxfill8(buf, xsize, COL8_000000, 3 + 10, 5 + 0, 3 + 10 + 15, 5 + 15);
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 + 2, 5 + 0 + 2, 3 + 10 + 15 - 2, 5 + 15 - 2);
+  } else {
+    boxfill8(buf, xsize, COL8_FFFFFF, 3, 5, xsize - 4, 5 + 15);
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 - 2, 5 + 0 - 2, 3 + 10 + 15 + 2, 5 + 15 + 2);
+    boxfill8(buf, xsize, COL8_C6C6C6, 3 + 10, 5 + 0, 3 + 10 + 15, 5 + 15);
+    boxfill8(buf, xsize, COL8_FFFFFF, 3 + 10 + 2, 5 + 0 + 2, 3 + 10 + 15 - 2, 5 + 15 - 2);
+  }
+  x = xsize / 2 - strlen(sht->title) * 8 / 2;
+  boxfill8(buf, xsize, COL8_FFFFFF, x - 5, 4, x + strlen(sht->title) * 8 + 5, 20);
+  putfonts8_asc(buf, xsize, x, 4, COL8_000000, sht->title);
   return;
 }
 

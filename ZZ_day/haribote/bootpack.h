@@ -160,6 +160,7 @@ struct SHEET {
   int bxsize, bysize, vx0, vy0, col_inv, height, flags;
   struct SHTCTL *ctl;
   struct TASK *task;
+  char *title;
 };
 
 #define MAX_SHEETS 256
@@ -308,4 +309,5 @@ void cons_putstr0(struct CONSOLE *cons, char *s);
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title,
                   char act);
 void make_wtitle8(unsigned char *buf, int xsize, char *title, char act);
+void change_wtitle8(struct SHEET *sht, char act);
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);

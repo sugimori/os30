@@ -2,15 +2,13 @@
 
 void cons_putchar(struct CONSOLE *cons, int chr, char move);
 void cons_newline(struct CONSOLE *cons);
-void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat,
-                 unsigned int memtotal);
+void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int memtotal);
 void cmd_mem(struct CONSOLE *cons, unsigned int memtotal);
 void cmd_cls(struct CONSOLE *cons);
 void cmd_dir(struct CONSOLE *cons);
 void cmd_type(struct CONSOLE *cons, int *fat, char *cmdline);
 int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline);
-void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1,
-                     int col);
+void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col);
 
 void console_task(struct SHEET *sheet, unsigned int memtotal) {
   struct TASK *task = task_now();
@@ -62,8 +60,7 @@ void console_task(struct SHEET *sheet, unsigned int memtotal) {
       }
       if (i == 3) {  // カーソルOFF
         cons.cur_c = -1;
-        boxfill8(sheet->buf, sheet->bxsize, COL8_000000, cons.cur_x, cons.cur_y,
-                 cons.cur_x + 7, cons.cur_y + 15);
+        boxfill8(sheet->buf, sheet->bxsize, COL8_000000, cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
       }
 
       if (256 <= i && i <= 511) {  // キーボードデータ
@@ -93,11 +90,9 @@ void console_task(struct SHEET *sheet, unsigned int memtotal) {
       }
       // カーソル再表示
       if (cons.cur_c >= 0) {
-        boxfill8(sheet->buf, sheet->bxsize, cons.cur_c, cons.cur_x, cons.cur_y,
-                 cons.cur_x + 7, cons.cur_y + 15);
+        boxfill8(sheet->buf, sheet->bxsize, cons.cur_c, cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
       }
-      sheet_refresh(sheet, cons.cur_x, cons.cur_y, cons.cur_x + 8,
-                    cons.cur_y + 16);
+      sheet_refresh(sheet, cons.cur_x, cons.cur_y, cons.cur_x + 8, cons.cur_y + 16);
     }
   }
 }
@@ -108,8 +103,7 @@ void cons_putchar(struct CONSOLE *cons, int chr, char move) {
   s[1] = 0;
   if (s[0] == 0x09) {  // タブ
     for (;;) {
-      putfonts8_asc_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF,
-                        COL8_000000, " ", 1);
+      putfonts8_asc_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, " ", 1);
       cons->cur_x += 8;
       if (cons->cur_x == 8 + 240) {  // 画面の端まで行ったら改行
         cons_newline(cons);
@@ -123,8 +117,7 @@ void cons_putchar(struct CONSOLE *cons, int chr, char move) {
   } else if (s[0] == 0x0d) {  // CR復帰
                               // 何もしない
   } else {                    // 普通の文字
-    putfonts8_asc_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF,
-                      COL8_000000, s, 1);
+    putfonts8_asc_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, s, 1);
     if (move != 0) {
       // moveが0のときはカーソルを進めない
       cons->cur_x += 8;
@@ -160,8 +153,7 @@ void cons_newline(struct CONSOLE *cons) {
     // スクロール
     for (y = 28; y < 28 + 16 * 7; y++) {
       for (x = 8; x < 8 + 8 * 30; x++) {
-        sheet->buf[x + y * sheet->bxsize] =
-            sheet->buf[x + (y + 16) * sheet->bxsize];
+        sheet->buf[x + y * sheet->bxsize] = sheet->buf[x + (y + 16) * sheet->bxsize];
       }
     }
     // 最後の行は黒で塗りつぶす
@@ -176,8 +168,7 @@ void cons_newline(struct CONSOLE *cons) {
   return;
 }
 
-void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat,
-                 unsigned int memtotal) {
+void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int memtotal) {
   // コマンド実行
   if (strcmp(cmdline, "mem") == 0) {
     cmd_mem(cons, memtotal);
@@ -200,8 +191,7 @@ void cmd_mem(struct CONSOLE *cons, unsigned int memtotal) {
   // memコマンド
   struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
   char s[30];
-  sprintf(s, "total  %dMB\nfree %dKB\n\n", memtotal / (1024 * 1024),
-          memman_total(memman) / 1024);
+  sprintf(s, "total  %dMB\nfree %dKB\n\n", memtotal / (1024 * 1024), memman_total(memman) / 1024);
   cons_putstr0(cons, s);
   return;
 }
@@ -249,15 +239,13 @@ void cmd_dir(struct CONSOLE *cons) {
 
 void cmd_type(struct CONSOLE *cons, int *fat, char *cmdline) {
   struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
-  struct FILEINFO *finfo = file_search(
-      cmdline + 5, (struct FILEINFO *)(ADR_DISKIMG + 0x002600), 224);
+  struct FILEINFO *finfo = file_search(cmdline + 5, (struct FILEINFO *)(ADR_DISKIMG + 0x002600), 224);
   char *p;
   int i;
   if (finfo != 0) {
     // ファイルが見つかった場合
     p = (char *)memman_alloc_4k(memman, finfo->size);
-    file_loadfile(finfo->clustno, finfo->size, p, fat,
-                  (char *)(ADR_DISKIMG + 0x003e00));
+    file_loadfile(finfo->clustno, finfo->size, p, fat, (char *)(ADR_DISKIMG + 0x003e00));
     cons_putstr1(cons, p, finfo->size);
     memman_free_4k(memman, (int)p, finfo->size);
   } else {
@@ -302,8 +290,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline) {
   if (finfo != 0) {
     // ファイルが見つかった場合
     p = (char *)memman_alloc_4k(memman, finfo->size);
-    file_loadfile(finfo->clustno, finfo->size, p, fat,
-                  (char *)(ADR_DISKIMG + 0x003e00));
+    file_loadfile(finfo->clustno, finfo->size, p, fat, (char *)(ADR_DISKIMG + 0x003e00));
     if (finfo->size >= 36 && strncmp(p + 4, "Hari", 4) == 0 && *p == 0x00) {
       seqsiz = *((int *)(p + 0x0000));
       esp = *((int *)(p + 0x000c));
@@ -321,7 +308,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline) {
       shtctl = (struct SHTCTL *)*((int *)0x0fe4);
       for (i = 0; i < MAX_SHEETS; i++) {
         sht = &(shtctl->sheets0[i]);
-        if (sht->flags != 0 && sht->task == task) {
+        if ((sht->flags & 0x11) == 0x11 && sht->task == task) {
           // アプリが開きっぱなしにした下敷きを発見
           sheet_free(sht);
         }
@@ -337,8 +324,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline) {
   return 0;
 }
 
-int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx,
-             int eax) {
+int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax) {
   int ds_base = *((int *)0xfe8);
   struct TASK *task = task_now();
   struct CONSOLE *cons = (struct CONSOLE *)*((int *)0x0fec);
@@ -365,6 +351,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx,
     // name
     sht = sheet_alloc(shtctl);
     sht->task = task;
+    sht->flags |= 0x10;
     sheet_setbuf(sht, (char *)ebx + ds_base, esi, edi, eax);
     make_window8((char *)ebx + ds_base, esi, edi, (char *)ecx + ds_base, 0);
     sheet_slide(sht, 100, 50);
@@ -475,8 +462,7 @@ int *inthandler0c(int *esp) {
   return &(task->tss.esp0);
 }
 
-void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1,
-                     int col) {
+void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col) {
   int i, x, y, len, dx, dy;
 
   dx = x1 - x0;
