@@ -74,6 +74,7 @@ void change_wtitle8(struct SHEET *sht, char act) {
   x = xsize / 2 - strlen(sht->title) * 8 / 2;
   boxfill8(buf, xsize, COL8_FFFFFF, x - 5, 4, x + strlen(sht->title) * 8 + 5, 20);
   putfonts8_asc(buf, xsize, x, 4, COL8_000000, sht->title);
+  sheet_refresh(sht, 3, 3, xsize, 22);
   return;
 }
 
