@@ -15,6 +15,7 @@ BITS 32
     GLOBAL  api_closewin
     GLOBAL  api_getkey
     GLOBAL  api_alloctimer,api_inittimer, api_settimer, api_freetimer
+    GLOBAL  api_beep
 [SECTION .text]	
 
 api_putchar:    ;void api_putchar(int c);
@@ -213,4 +214,10 @@ api_freetimer:      ; void api_freetimer(int timer);
     MOV     EBX,[ESP+8]     ; timer
     INT     0x40
     POP     EBX
+    RET
+
+api_beep:           ; void api_beep(int tone);
+    MOV     EDX,20
+    MOV     EAX, [ESP+4]        ; tone
+    INT     0x40
     RET
