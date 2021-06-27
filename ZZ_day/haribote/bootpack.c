@@ -26,7 +26,7 @@ void HariMain(void) {
   // cursor
   int cursor_x, cursor_c;
   //マルチタスク
-  struct TASK *task_a, *task_cons[2];
+  struct TASK *task_a, *task_cons[2], *task;
   // コンソール
   struct CONSOLE *cons;
   // ウインドウ
@@ -260,13 +260,15 @@ void HariMain(void) {
           wait_KBC_sendready();
           io_out8(PORT_KEYDAT, keycmd_wait);
         }
-        if (i - 256 == 0x3b && key_shift != 0 && task_cons[0]->tss.ss0 != 0) {  // Shift+F1
-          cons = (struct CONSOLE *)*((int *)0x0fec);
-          cons_putstr0(cons, "\nBreak(key) :\n");
-          io_cli();  // 割り込み中止
-          task_cons[0]->tss.eax = (int)&(task_cons[0]->tss.esp0);
-          task_cons[0]->tss.eip = (int)asm_end_app;
-          io_sti();
+        if (i - 256 == 0x3b && key_shift != 0) {
+          task = key_win->task;
+          if (task != 0 && task->tss.ss0 != 0) {  // Shift+F1
+            cons_putstr0(task->cons, "\nBreak(key) :\n");
+            io_cli();  // 割り込み中止
+            task->tss.eax = (int)&(task->tss.esp0);
+            task->tss.eip = (int)asm_end_app;
+            io_sti();
+          }
         }
 
         // カーソルの再表示
@@ -309,11 +311,11 @@ void HariMain(void) {
                     }
                     if (3 + 10 <= x && x < 3 + 10 + 15 && 5 <= y && y < 5 + 15) {  // バツボタン
                       if ((sht->flags & 0x10) != 0) {  // アプリが作ったウインドかか？
-                        cons = (struct CONSOLE *)*((int *)0x0fec);
-                        cons_putstr0(cons, "\nBreak(mouse) :\n");
+                        task = sht->task;
+                        cons_putstr0(task->cons, "\nBreak(mouse) :\n");
                         io_cli();
-                        task_cons[0]->tss.eax = (int)&(task_cons[0]->tss.esp0);
-                        task_cons[0]->tss.eip = (int)asm_end_app;
+                        task->tss.eax = (int)&(task->tss.esp0);
+                        task->tss.eip = (int)asm_end_app;
                         io_sti();
                       }
                     }
