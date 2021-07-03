@@ -5,8 +5,6 @@ extern struct TIMER *task_timer;
 #define KEYCMD_LED 0xed
 void keywin_off(struct SHEET *key_win);
 void keywin_on(struct SHEET *key_win);
-struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
-void close_console(struct SHEET *sht);
 
 void HariMain(void) {
   struct BOOTINFO *binfo = (struct BOOTINFO *)ADR_BOOTINFO;

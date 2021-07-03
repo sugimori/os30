@@ -3,6 +3,7 @@
 void cons_putchar(struct CONSOLE *cons, int chr, char move);
 void cons_newline(struct CONSOLE *cons);
 void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int memtotal);
+void cmd_start(struct CONSOLE *cons, char *cmdline, int memtotal);
 void cmd_exit(struct CONSOLE *cons, int *fat);
 void cmd_mem(struct CONSOLE *cons, unsigned int memtotal);
 void cmd_cls(struct CONSOLE *cons);
@@ -183,12 +184,30 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int mem
     cmd_type(cons, fat, cmdline);
   } else if (strcmp(cmdline, "exit") == 0) {
     cmd_exit(cons, fat);
+  } else if (strncmp(cmdline, "start ", 6) == 0) {
+    cmd_start(cons, cmdline, memtotal);
   } else if (cmdline[0] != 0) {
     if (cmd_app(cons, fat, cmdline) == 0) {
       // コマンドでもなく、空行でもない
       cons_putstr0(cons, "Bad command.\n\n");
     }
   }
+  return;
+}
+
+void cmd_start(struct CONSOLE *cons, char *cmdline, int memtotal) {
+  struct SHTCTL *shtctl = (struct SHTCTL *)*((int *)0x0fe4);
+  struct SHEET *sht = open_console(shtctl, memtotal);
+  struct FIFO32 *fifo = &sht->task->fifo;
+  int i;
+  sheet_slide(sht, 32, 34);
+  sheet_updown(sht, shtctl->top);
+  // コマンドラインに入さされた文字をｗ、１文字ずつ新しこコンソーに入力
+  for (i = 6; cmdline[i] != 0; i++) {
+    fifo32_put(fifo, cmdline[i] + 256);
+  }
+  fifo32_put(fifo, 10 + 256);  // ENTER
+  cons_newline(cons);
   return;
 }
 

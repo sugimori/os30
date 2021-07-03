@@ -306,3 +306,7 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char ac
 void make_wtitle8(unsigned char *buf, int xsize, char *title, char act);
 void change_wtitle8(struct SHEET *sht, char act);
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
+
+/* bootpack.c */
+struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
+void close_console(struct SHEET *sht);
