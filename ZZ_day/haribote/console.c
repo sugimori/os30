@@ -13,7 +13,7 @@ void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col)
 void console_task(struct SHEET *sheet, unsigned int memtotal) {
   struct TASK *task = task_now();
   struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
-  int i, fifobuf[128];
+  int i;
   // FAT
   int *fat = (int *)memman_alloc_4k(memman, 4 * 2880);
   struct CONSOLE cons;
@@ -24,7 +24,6 @@ void console_task(struct SHEET *sheet, unsigned int memtotal) {
   cons.cur_c = -1;
   task->cons = &cons;
 
-  fifo32_init(&task->fifo, 128, fifobuf, task);
   cons.timer = timer_alloc();
   timer_init(cons.timer, &task->fifo, 1);
   timer_settime(cons.timer, 50);
