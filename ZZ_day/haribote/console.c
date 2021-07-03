@@ -62,6 +62,9 @@ void console_task(struct SHEET *sheet, unsigned int memtotal) {
         cons.cur_c = -1;
         boxfill8(sheet->buf, sheet->bxsize, COL8_000000, cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
       }
+      if (i == 4) {  // コンソーバツ✗ボタン
+        cmd_exit(&cons, fat);
+      }
 
       if (256 <= i && i <= 511) {  // キーボードデータ
         if (i == 8 + 256) {
