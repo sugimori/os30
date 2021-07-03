@@ -309,4 +309,6 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c);
 
 /* bootpack.c */
 struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
+struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal);
 void close_console(struct SHEET *sht);
+void close_constask(struct TASK *task);
