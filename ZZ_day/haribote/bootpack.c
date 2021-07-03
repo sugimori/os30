@@ -12,6 +12,8 @@ void HariMain(void) {
   int fifobuf[128], keycmd_buf[32], *cons_fifo[2];
   char s[40], mcursor[256];
   int mx, my, i;
+  int new_mx = -1, new_my = 0;          // マウスの新座標
+  int new_wx = 0x7fffffff, new_wy = 0;  // ウインドのｎ新座標
   unsigned char mouse_dbuf[3], mouse_phase;
   struct MOUSE_DEC mdec;
   // memory関連宣言
@@ -143,8 +145,19 @@ void HariMain(void) {
     }
     io_cli();  // 割り込み禁止
     if (fifo32_status(&fifo) == 0) {
-      task_sleep(task_a);
-      io_stihlt();  // 早すぎるので、HLTを入れるパターン
+      // FIFOが空っぽになったので、保留している描画があれば実行する
+      if (new_mx >= 0) {
+        io_sti();
+        sheet_slide(sht_mouse, new_mx, new_my);  // マウのの移動
+        new_mx = -1;
+      } else if (new_wx != 0x7fffffff) {
+        io_sti();
+        sheet_slide(sht, new_wx, new_wy);  // シーのの移動
+        new_wx = 0x7fffffff;
+      } else {
+        task_sleep(task_a);
+        io_sti();  // HLTを削除
+      }
     } else {
       i = fifo32_get(&fifo);
       io_sti();                   // 割り込み開始
@@ -239,7 +252,9 @@ void HariMain(void) {
           if (my > binfo->scrny - 1) my = binfo->scrny - 1;
           // sprintf(s, "(%d, %d)", mx, my);
           // putfonts8_asc_sht(sht_back,0,0,COL8_FFFFFF,COL8_008484,s,12);
-          sheet_slide(sht_mouse, mx, my);
+          // sheet_slide(sht_mouse, mx, my);
+          new_mx = mx;
+          new_my = my;
           if ((mdec.btn & 0x01) != 0) {
             // 左ボタンを押している
             if (mmx < 0) {
@@ -247,8 +262,8 @@ void HariMain(void) {
               // 上の下敷きから順番にマウスが指している下敷きを探す
               for (j = shtctl->top - 1; j > 0; j--) {
                 sht = shtctl->sheets[j];
-                x = mx - sht->vx0;
-                y = my - sht->vy0;
+                x = mx - sht->vx0;  // シートからの相対座標
+                y = my - sht->vy0;  // シートからの相ざ座標
                 if (0 <= x && x < sht->bxsize && 0 <= y && y < sht->bysize) {
                   if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
                     sheet_updown(sht, shtctl->top - 1);
@@ -261,6 +276,7 @@ void HariMain(void) {
                       mmx = mx;                                               // ウインドウ移動モード
                       mmy = my;
                       mmx2 = sht->vx0;
+                      new_wy = sht->vy0;
                     }
                     if (3 + 10 <= x && x < 3 + 10 + 15 && 5 <= y && y < 5 + 15) {  // バツボタン
                       if ((sht->flags & 0x10) != 0) {  // アプリが作ったウインドかか？
@@ -280,12 +296,17 @@ void HariMain(void) {
               // ウインドウ移動モード
               x = mx - mmx;
               y = my - mmy;
-              sheet_slide(sht, (mmx2 + x + 2) & ~3, sht->vy0 + y);  // 四捨五入みたいにするため+2
+              new_wx = (mmx2 + x + 2) & ~3;
+              new_wy = new_wy + y;
               mmy = my;
             }
           } else {
             // 左ボタンを押していない
             mmx = -1;
+            if (new_wx != 0x7fffffff) {
+              sheet_slide(sht, new_wx, new_wy);
+              new_wx = 0x7fffffff;
+            }
           }
         }
       }
