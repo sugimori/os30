@@ -22,7 +22,7 @@ void HariMain(void) {
   struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
   // sheet関連
   struct SHTCTL *shtctl;
-  struct SHEET *sht_back, *sht_mouse, *sht_cons[2];
+  struct SHEET *sht_back, *sht_mouse;
   unsigned char *buf_back, buf_mouse[256], *buf_cons[2];
   //マルチタスク
   struct TASK *task_a, *task_cons[2], *task;
@@ -30,7 +30,8 @@ void HariMain(void) {
   struct CONSOLE *cons;
   // ウインドウ
   int j, x, y, mmx = -1, mmy = -1, mmx2 = 0;
-  struct SHEET *sht = 0, *key_win;
+  struct SHEET *sht = 0;
+  struct SHEET *key_win;  // 入力状のコンソール
 
   init_gdtidt();
   init_pic();
@@ -64,8 +65,7 @@ void HariMain(void) {
   init_screen8(buf_back, binfo->scrnx, binfo->scrny);                // 背景初期化
 
   // sht_cons
-  sht_cons[0] = open_console(shtctl, memtotal);
-  sht_cons[1] = 0;
+  key_win = open_console(shtctl, memtotal);
 
   // mouse
   sht_mouse = sheet_alloc(shtctl);
@@ -75,12 +75,11 @@ void HariMain(void) {
   my = (binfo->scrny - 28 - 16) / 2;
 
   sheet_slide(sht_back, 0, 0);  // 背景の位置を設定
-  sheet_slide(sht_cons[0], 56, 46);
+  sheet_slide(key_win, 56, 46);
   sheet_slide(sht_mouse, mx, my);
   sheet_updown(sht_back, 0);  // 背景は０固定？
-  sheet_updown(sht_cons[0], 1);
+  sheet_updown(key_win, 1);
   sheet_updown(sht_mouse, 2);
-  key_win = sht_cons[0];
   keywin_on(key_win);
 
   // http://oswiki.osask.jp/?%28AT%29keyboard
@@ -216,13 +215,12 @@ void HariMain(void) {
             io_sti();
           }
         }
-        if (i - 256 == 0x3c && key_shift != 0 && sht_cons[1] == 0) {  // Shift-F2
-          sht_cons[1] = open_console(shtctl, memtotal);
-          sheet_slide(sht_cons[1], 32, 4);
-          sheet_updown(sht_cons[1], shtctl->top);
-          // 新しく作っこコンソールを入力選択状ににする
+        if (i - 256 == 0x3c && key_shift != 0) {  // Shift-F2
           keywin_off(key_win);
-          key_win = sht_cons[1];
+          key_win = open_console(shtctl, memtotal);
+          sheet_slide(key_win, 32, 24);
+          sheet_updown(key_win, shtctl->top);
+          // 新しく作っこコンソールを入力選択状ににする
           keywin_on(key_win);
         }
       } else if (512 <= i && i <= 767) {  // マウス
