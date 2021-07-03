@@ -26,7 +26,7 @@ void HariMain(void) {
   // コンソール
   struct CONSOLE *cons;
   // ウインドウ
-  int j, x, y, mmx = -1, mmy = -1;
+  int j, x, y, mmx = -1, mmy = -1, mmx2 = 0;
   struct SHEET *sht = 0, *key_win;
 
   init_gdtidt();
@@ -260,6 +260,7 @@ void HariMain(void) {
                     if (3 <= x && x < sht->bxsize - 3 && 3 <= y && y < 21) {  // タイトル部分
                       mmx = mx;                                               // ウインドウ移動モード
                       mmy = my;
+                      mmx2 = sht->vx0;
                     }
                     if (3 + 10 <= x && x < 3 + 10 + 15 && 5 <= y && y < 5 + 15) {  // バツボタン
                       if ((sht->flags & 0x10) != 0) {  // アプリが作ったウインドかか？
@@ -279,8 +280,7 @@ void HariMain(void) {
               // ウインドウ移動モード
               x = mx - mmx;
               y = my - mmy;
-              sheet_slide(sht, sht->vx0 + x, sht->vy0 + y);
-              mmx = mx;
+              sheet_slide(sht, (mmx2 + x + 2) & ~3, sht->vy0 + y);  // 四捨五入みたいにするため+2
               mmy = my;
             }
           } else {

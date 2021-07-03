@@ -198,8 +198,8 @@ void sheet_free(struct SHEET *sht) {
 }
 
 void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int h0) {
-  int h, bx, by, vx, vy, bx0, by0, bx1, by1;
-  unsigned char *buf, sid, *map = ctl->map;
+  int h, bx, by, vx, vy, bx0, by0, bx1, by1, sid4, *p;  // int 32bit
+  unsigned char *buf, sid, *map = ctl->map;             // unsined char 8bit
   struct SHEET *sht;
 
   // 画面外にはみ出していたら補正
@@ -212,7 +212,7 @@ void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, in
     sht = ctl->sheets[h];
     sid = sht - ctl->sheets0;  // 番地の差分？
     buf = sht->buf;
-    bx0 = vx0 - sht->vx0;
+    bx0 = vx0 - sht->vx0;  // sheetからの相対アドレへ変換
     by0 = vy0 - sht->vy0;
     bx1 = vx1 - sht->vx0;
     by1 = vy1 - sht->vy0;
@@ -224,12 +224,26 @@ void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, in
     if (by1 > sht->bysize) by1 = sht->bysize;
 
     if (sht->col_inv == -1) {
-      // 透明色なし専用の高速版
-      for (by = by0; by < by1; by++) {
-        vy = sht->vy0 + by;
-        for (bx = bx0; bx < bx1; bx++) {
-          vx = sht->vx0 + bx;
-          map[vy * ctl->xsize + vx] = sid;
+      if ((sht->vx0 & 3) == 0 && (bx0 & 3) == 0 && (bx1 & 3) == 0) {
+        // 透明色なし専用の高速版(4バイト版)
+        bx1 = (bx1 - bx0) / 4;                          // MOV回数
+        sid4 = sid | sid << 8 | sid << 16 | sid << 24;  // 同じsidを8bitずつずらして書く
+        for (by = by0; by < by1; by++) {
+          vy = sht->vy0 + by;
+          vx = sht->vx0 + bx0;
+          p = (int *)&map[vy * ctl->xsize + vx];
+          for (bx = 0; bx < bx1; bx++) {
+            p[bx] = sid4;
+          }
+        }
+      } else {
+        // 透明色なし専のの高速版（１バイト版）
+        for (by = by0; by < by1; by++) {
+          vy = sht->vy0 + by;
+          for (bx = bx0; bx < bx1; bx++) {
+            vx = sht->vx0 + bx;
+            map[vy * ctl->xsize + vx] = sid;
+          }
         }
       }
     } else {
