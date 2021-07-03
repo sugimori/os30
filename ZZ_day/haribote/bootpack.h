@@ -253,6 +253,7 @@ struct TASK {
   struct TSS32 tss;
   struct CONSOLE *cons;
   int ds_base;
+  int cons_stack;
 };
 
 struct TASKLEVEL {
