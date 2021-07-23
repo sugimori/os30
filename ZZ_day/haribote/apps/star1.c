@@ -11,8 +11,9 @@ void HariMain(void) {
   api_boxfilwin(win, 6, 26, 143, 93, 0 /* black */);
   api_point(win, 75, 59, 3 /* yellow */);
   for (;;) {
-    i = api_getkey(1);
+    if (api_getkey(1) == 0x0a) {
+      break;
+    }
   }
-  api_closewin(win);
   api_end();
 }
