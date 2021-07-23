@@ -118,5 +118,5 @@ api%.o : api%.nas Makefile
 apilib.a: $(OBJS_API) sprintf.o Makefile
 	$(AR) r apilib.a $(OBJS_API) sprintf.o
 
-%.hrb : %.o Makefile apilib.a Makefile api.ls 
+%.hrb : %.o Makefile apilib.a Makefile api.ls apilib.h
 	$(LD) -m elf_i386 -nostdlib -Tapi.ls $*.o apilib.a  -o $*.hrb -Map $*.map
