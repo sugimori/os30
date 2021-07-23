@@ -7,10 +7,12 @@ void api_free(char *addr, int size);
 void api_point(int win, int x, int y, int col);
 void api_putstr0(char *s);
 void api_end(void);
+int api_getkey(int mode);
+void api_closewin(int win);
 
 void HariMain(void) {
   char *buf;
-  int win;
+  int win, i;
 
   api_initmalloc();
   buf = api_malloc(150 * 100);
@@ -18,5 +20,9 @@ void HariMain(void) {
   win = api_openwin(buf, 150, 100, -1, "star1");
   api_boxfilwin(win, 6, 26, 143, 93, 0 /* black */);
   api_point(win, 75, 59, 3 /* yellow */);
+  for (;;) {
+    i = api_getkey(1);
+  }
+  api_closewin(win);
   api_end();
 }

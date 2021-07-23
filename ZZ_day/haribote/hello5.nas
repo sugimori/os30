@@ -1,7 +1,5 @@
         GLOBAL      HariMain
 
-section text
-
 HariMain:
         MOV     EDX,2
         MOV     EBX,msg
@@ -9,6 +7,6 @@ HariMain:
         MOV     EDX,4
         INT     0x40
 
-section data
+section .data
 msg:
         DB      "hello, World", 0x0a, 0
