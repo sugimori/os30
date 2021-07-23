@@ -16,8 +16,9 @@ EDIMG    = $(TOOLPATH)edimg
 IMGTOL   = $(TOOLPATH)imgtol
 COPY     = cp
 DEL      = rm -f
-OBJS_BOOTPACK = bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o memory.o sheet.o timer.o mtask.o strcmp.o window.o console.o file.o
-OBJS_API = api001.o api002.o api003.o api004.o api005.o api006.o api007.o api008.o api009.o api010.o
+IPL10    = ./haribote/ipl10.bin
+HARIBOTESYS = ./haribote/haribote.sys
+HARIBOTEIMG = haribote.img
 
 # デフォルト動作
 
@@ -26,53 +27,19 @@ default :
 
 # ファイル生成規則
 
-%.bin : %.nas Makefile
-	$(NASK) $*.nas -o $*.bin -l $*.lst
+$(IPL10):
+	$(MAKE) -C haribote
 
-naskfunc.o : naskfunc.nas Makefile
-	$(NASK) -g -f elf naskfunc.nas -o naskfunc.o -l naskfunc.lst
+$(HARIBOTESYS):
+	$(MAKE) -C haribote
 
-%.o : %.nas Makefile
-	$(NASK) -g -f elf $*.nas -o $*.o -l $*.lst
-
-hankaku.c : hankaku.txt
-	./makefont.rb > hankaku.c
-
-%.o : %.c Makefile bootpack.h
-	$(CC) -march=i486 -m32 -nostdlib -c $*.c -o $*.o
-	
-bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld 
-	$(LD) -v -march=i486 -m elf_i386 -nostdlib -T har.ld $(OBJS_BOOTPACK) -o bootpack.hrb -Map bootpack.map
-#	$(CC) -v -march=i486 -m32 -nostdlib -T har.ld bootpack.o -o bootpack.hrb
-
-haribote.sys : asmhead.bin bootpack.hrb Makefile
-	cat asmhead.bin bootpack.hrb > haribote.sys
-
-haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb hello4.hrb hello5.hrb winhelo.hrb winhelo2.hrb winhelo3.hrb star1.hrb stars.hrb stars2.hrb lines.hrb walk.hrb noodle.hrb beepdown.hrb color.hrb color2.hrb crack7.hrb
-	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
-	mcopy -i haribote.img haribote.sys ::
-	mcopy -i haribote.img ipl10.nas ::
+haribote.img : $(IPL10) $(HARIBOTESYS) Makefile 
+	mformat -f 1440 -C -B $(IPL10) -i haribote.img ::
+	mcopy -i haribote.img $(HARIBOTESYS) ::
+	mcopy -i haribote.img $(IPL10) ::
 	mcopy -i haribote.img Makefile ::
 	mcopy -i haribote.img test.txt ::
-	mcopy -i haribote.img hello.hrb  ::
-	mcopy -i haribote.img hello2.hrb  ::
-	mcopy -i haribote.img a.hrb  ::
-	mcopy -i haribote.img hello3.hrb  ::
-	mcopy -i haribote.img hello4.hrb  ::
-	mcopy -i haribote.img hello5.hrb  ::
-	mcopy -i haribote.img winhelo.hrb  ::
-	mcopy -i haribote.img winhelo2.hrb  ::
-	mcopy -i haribote.img winhelo3.hrb  ::
-	mcopy -i haribote.img star1.hrb  ::
-	mcopy -i haribote.img stars.hrb  ::
-	mcopy -i haribote.img stars2.hrb  ::
-	mcopy -i haribote.img lines.hrb  ::
-	mcopy -i haribote.img walk.hrb  ::
-	mcopy -i haribote.img noodle.hrb  ::
-	mcopy -i haribote.img beepdown.hrb  ::
-	mcopy -i haribote.img color.hrb  ::
-	mcopy -i haribote.img color2.hrb  ::
-	mcopy -i haribote.img crack7.hrb  ::
+
 
 # -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
 
@@ -81,8 +48,11 @@ haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3
 img :
 	$(MAKE) haribote.img
 
-run : a.hrb
-	$(MAKE) img
+run : 
+	$(MAKE) -C haribote
+	$(MAKE) haribote.img
+	$(MAKE) -C apilib
+	$(MAKE) -C apps
 	$(COPY) haribote.img ../../z_tools/qemu/fdimage0.bin
 	$(MAKE) -C ../../z_tools/qemu
 
@@ -91,19 +61,10 @@ install :
 	$(IMGTOL) w a: haribote.img
 
 clean :
-	-$(DEL) *.bin
-	-$(DEL) *.lst
-	-$(DEL) *.gas
-	-$(DEL) *.obj
-	-$(DEL) *.o
-	-$(DEL) *.map
-	-$(DEL) bootpack.nas
-	-$(DEL) bootpack.map
-	-$(DEL) bootpack.bim
-	-$(DEL) bootpack.hrb
-	-$(DEL) haribote.sys
-	-$(DEL) hankaku.c
-	-$(DEL) apilib.a
+	-$(DEL) haribote.img
+	$(MAKE) -C haribote clean
+	$(MAKE) -C apilib clean
+	$(MAKE) -C apps clean
 
 src_only :
 	$(MAKE) clean
