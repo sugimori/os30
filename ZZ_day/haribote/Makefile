@@ -4,8 +4,10 @@ INCPATH  = ../../z_tools/haribote/
 MAKE     = make -r
 NASK     = nasm
 #CC      = /usr/local/Cellar/x86_64-elf-gcc/9.3.0/bin/x86_64-elf-gcc
-CC      = /usr/local/Cellar/x86_64-elf-gcc/10.2.0/bin/x86_64-elf-gcc
-LD 		= /usr/local/Cellar/x86_64-elf-binutils/2.35/bin/x86_64-elf-ld
+CC       = /usr/local/Cellar/x86_64-elf-gcc/10.2.0/bin/x86_64-elf-gcc
+LD 		   = /usr/local/Cellar/x86_64-elf-binutils/2.35/bin/x86_64-elf-ld
+AR       = /usr/local/Cellar/x86_64-elf-binutils/2.35/bin/x86_64-elf-ar
+RANLIB   = /usr/local/Cellar/x86_64-elf-binutils/2.35/bin/x86_64-elf-ranlib
 GAS2NASK = $(TOOLPATH)gas2nask -a
 OBJ2BIM  = $(TOOLPATH)obj2bim
 BIM2HRB  = $(TOOLPATH)bim2hrb
@@ -15,6 +17,7 @@ IMGTOL   = $(TOOLPATH)imgtol
 COPY     = cp
 DEL      = rm -f
 OBJS_BOOTPACK = bootpack.o naskfunc.o hankaku.o sprintf.o graphic.o dsctbl.o int.o fifo.o keyboard.o mouse.o memory.o sheet.o timer.o mtask.o strcmp.o window.o console.o file.o
+OBJS_API = api001.o api002.o api003.o api004.o api005.o api006.o api007.o api008.o api009.o api010.o
 
 # デフォルト動作
 
@@ -45,7 +48,7 @@ bootpack.hrb : $(OBJS_BOOTPACK) Makefile har.ld
 haribote.sys : asmhead.bin bootpack.hrb Makefile
 	cat asmhead.bin bootpack.hrb > haribote.sys
 
-haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb crack1.hrb crack2.hrb crack3.hrb crack4.hrb crack5.hrb crack6.hrb bug1.hrb bug2.hrb bug3.hrb hello4.hrb hello5.hrb winhelo.hrb winhelo2.hrb winhelo3.hrb star1.hrb stars.hrb stars2.hrb lines.hrb walk.hrb noodle.hrb beepdown.hrb color.hrb color2.hrb crack7.hrb
+haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3.hrb hello4.hrb hello5.hrb winhelo.hrb winhelo2.hrb winhelo3.hrb star1.hrb stars.hrb stars2.hrb lines.hrb walk.hrb noodle.hrb beepdown.hrb color.hrb color2.hrb crack7.hrb
 	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
 	mcopy -i haribote.img haribote.sys ::
 	mcopy -i haribote.img ipl10.nas ::
@@ -55,15 +58,6 @@ haribote.img : ipl10.bin haribote.sys Makefile hello.hrb hello2.hrb a.hrb hello3
 	mcopy -i haribote.img hello2.hrb  ::
 	mcopy -i haribote.img a.hrb  ::
 	mcopy -i haribote.img hello3.hrb  ::
-	mcopy -i haribote.img crack1.hrb  ::
-	mcopy -i haribote.img crack2.hrb  ::
-	mcopy -i haribote.img crack3.hrb  ::
-	mcopy -i haribote.img crack4.hrb  ::
-	mcopy -i haribote.img crack5.hrb  ::
-	mcopy -i haribote.img crack6.hrb  ::
-	mcopy -i haribote.img bug1.hrb  ::
-	mcopy -i haribote.img bug2.hrb  ::
-	mcopy -i haribote.img bug3.hrb  ::
 	mcopy -i haribote.img hello4.hrb  ::
 	mcopy -i haribote.img hello5.hrb  ::
 	mcopy -i haribote.img winhelo.hrb  ::
@@ -109,6 +103,7 @@ clean :
 	-$(DEL) bootpack.hrb
 	-$(DEL) haribote.sys
 	-$(DEL) hankaku.c
+	-$(DEL) apilib.a
 
 src_only :
 	$(MAKE) clean
@@ -117,5 +112,11 @@ src_only :
 a_nasm.o : a_nasm.nas Makefile
 	$(NASK) -g -f elf32 a_nasm.nas -o a_nasm.o -l a_nasm.lst
 
-%.hrb : %.o Makefile a_nasm.o Makefile api.ls sprintf.o
-	$(LD) -m elf_i386 -nostdlib -Tapi.ls $*.o a_nasm.o sprintf.o -o $*.hrb -Map $*.map
+api%.o : api%.nas Makefile
+	$(NASK) -g -f elf32 api%.nas -o api%.o -l api%.lst
+
+apilib.a: $(OBJS_API) sprintf.o Makefile
+	$(AR) r apilib.a $(OBJS_API) sprintf.o
+
+%.hrb : %.o Makefile apilib.a Makefile api.ls 
+	$(LD) -m elf_i386 -nostdlib -Tapi.ls $*.o apilib.a  -o $*.hrb -Map $*.map
