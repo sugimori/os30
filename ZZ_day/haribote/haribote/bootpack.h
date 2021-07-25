@@ -259,6 +259,7 @@ struct TASK {
   struct FILEHANDLE *fhandle;
   int *fat;
   char *cmdline;
+  char langmode;
 };
 
 struct FILEHANDLE {

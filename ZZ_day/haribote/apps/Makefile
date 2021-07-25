@@ -19,7 +19,7 @@ HARIBOTESYS = ../haribote/haribote.sys
 HARIBOTEIMG = ../haribote.img
 COPY     = cp
 DEL      = rm -f
-APP      = hello.hrb hello2.hrb a.hrb hello3.hrb hello4.hrb hello5.hrb winhelo.hrb winhelo2.hrb winhelo3.hrb star1.hrb stars.hrb stars2.hrb lines.hrb walk.hrb noodle.hrb beepdown.hrb color.hrb color2.hrb crack7.hrb sosu.hrb sosu2.hrb sosu3.hrb typeipl.hrb type.hrb
+APP      = hello.hrb hello2.hrb a.hrb hello3.hrb hello4.hrb hello5.hrb winhelo.hrb winhelo2.hrb winhelo3.hrb star1.hrb stars.hrb stars2.hrb lines.hrb walk.hrb noodle.hrb beepdown.hrb color.hrb color2.hrb crack7.hrb sosu.hrb sosu2.hrb sosu3.hrb typeipl.hrb type.hrb iroha.hrb
 
 
 # デフォルト動作

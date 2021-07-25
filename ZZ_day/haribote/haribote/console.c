@@ -4,6 +4,7 @@ extern struct TASKCTL *taskctl;
 void cons_putchar(struct CONSOLE *cons, int chr, char move);
 void cons_newline(struct CONSOLE *cons);
 void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int memtotal);
+void cmd_langmode(struct CONSOLE *cons, char *cmdline);
 void cmd_ncst(struct CONSOLE *cons, char *cmdline, int memtotal);
 void cmd_start(struct CONSOLE *cons, char *cmdline, int memtotal);
 void cmd_exit(struct CONSOLE *cons, int *fat);
@@ -28,12 +29,19 @@ void console_task(struct SHEET *sheet, unsigned int memtotal) {
   cons.cur_c = -1;
   task->cons = &cons;
   task->cmdline = cmdline;
+  unsigned char *nihongo = (char *)*((int *)0x0fe8);
 
   for (i = 0; i < 8; i++) {
     fhandle[i].buf = 0;  // 未使用
   }
   task->fhandle = fhandle;
   task->fat = fat;
+
+  if (nihongo[4096] != 0xff) {  // 日本フォンをを読み込めたか
+    task->langmode = 1;
+  } else {
+    task->langmode = 0;
+  }
 
   if (cons.sht != 0) {
     cons.timer = timer_alloc();
@@ -212,12 +220,26 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int mem
     cmd_start(cons, cmdline, memtotal);
   } else if (strncmp(cmdline, "ncst ", 5) == 0) {
     cmd_ncst(cons, cmdline, memtotal);
+  } else if (strncmp(cmdline, "langmode ", 9) == 0) {
+    cmd_langmode(cons, cmdline);
   } else if (cmdline[0] != 0) {
     if (cmd_app(cons, fat, cmdline) == 0) {
       // コマンドでもなく、空行でもない
       cons_putstr0(cons, "Bad command.\n\n");
     }
   }
+  return;
+}
+
+void cmd_langmode(struct CONSOLE *cons, char *cmdline) {
+  struct TASK *task = task_now();
+  unsigned char mode = cmdline[9] - '0';
+  if (mode <= 1) {
+    task->langmode = mode;
+  } else {
+    cons_putstr0(cons, "mode number error.\n");
+  }
+  cons_newline(cons);
   return;
 }
 
