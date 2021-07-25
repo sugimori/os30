@@ -1,9 +1,8 @@
 #include "../apilib/apilib.h"
 
-char buf[150 * 50];
-
 void HariMain(void) {
   int win, i;
+  char buf[150 * 50];
   api_putstr0("Making Window...");
 
   win = api_openwin(buf, 150, 50, -1, "hello");
