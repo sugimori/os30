@@ -258,6 +258,7 @@ struct TASK {
   int cons_stack;
   struct FILEHANDLE *fhandle;
   int *fat;
+  char *cmdline;
 };
 
 struct FILEHANDLE {
