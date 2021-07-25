@@ -256,6 +256,14 @@ struct TASK {
   struct CONSOLE *cons;
   int ds_base;
   int cons_stack;
+  struct FILEHANDLE *fhandle;
+  int *fat;
+};
+
+struct FILEHANDLE {
+  char *buf;  // 0:未使用
+  int size;
+  int pos;
 };
 
 struct TASKLEVEL {

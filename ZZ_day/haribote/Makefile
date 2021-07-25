@@ -36,7 +36,7 @@ $(HARIBOTESYS):
 haribote.img : $(IPL10) $(HARIBOTESYS) Makefile 
 	mformat -f 1440 -C -B $(IPL10) -i haribote.img ::
 	mcopy -i haribote.img $(HARIBOTESYS) ::
-	mcopy -i haribote.img $(IPL10) ::
+	mcopy -i haribote.img haribote/ipl10.nas ::
 	mcopy -i haribote.img Makefile ::
 	mcopy -i haribote.img test.txt ::
 

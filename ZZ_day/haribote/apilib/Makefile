@@ -16,7 +16,7 @@ EDIMG    = $(TOOLPATH)edimg
 IMGTOL   = $(TOOLPATH)imgtol
 COPY     = cp
 DEL      = rm -f
-OBJS_API = api001.o api002.o api003.o api004.o api005.o api006.o api007.o api008.o api009.o api010.o alloca.o
+OBJS_API = api001.o api002.o api003.o api004.o api005.o api006.o api007.o api008.o api009.o api010.o alloca.o fileapi.o
 
 # デフォルト動作
 
