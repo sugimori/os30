@@ -36,10 +36,14 @@ $(HARIBOTESYS):
 haribote.img : $(IPL10) $(HARIBOTESYS) Makefile 
 	mformat -f 1440 -C -B $(IPL10) -i haribote.img ::
 	mcopy -i haribote.img $(HARIBOTESYS) ::
-	mcopy -i haribote.img nihongo.fnt ::
-	mcopy -i haribote.img haribote/ipl10.nas ::
-	mcopy -i haribote.img Makefile ::
-	mcopy -i haribote.img test.txt ::
+	# mcopy -i haribote.img nihongo.fnt ::
+	# mcopy -i haribote.img haribote/ipl10.nas ::
+	# mcopy -i haribote.img Makefile ::
+	# mcopy -i haribote.img test.txt ::
+
+nihongo:
+	mcopy -D o -i haribote.img nihongo.fnt ::
+
 
 
 # -i でイメージファイルを指定すると::でドライブにアクセスできるらしい
@@ -54,6 +58,7 @@ run :
 	$(MAKE) haribote.img
 	$(MAKE) -C apilib
 	$(MAKE) -C apps
+	$(MAKE) nihongo
 	$(COPY) haribote.img ../../z_tools/qemu/fdimage0.bin
 	$(MAKE) -C ../../z_tools/qemu
 
